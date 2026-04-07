@@ -12,7 +12,7 @@ export function NotFoundPage() {
       </p>
       <div className="flex items-center justify-center gap-3">
         <Button variant="outline" onClick={() => navigate(-1)}>Volver</Button>
-        <Button onClick={() => navigate('/dashboard')}>Ir al dashboard</Button>
+        <Button onClick={() => navigate('/app/dashboard')}>Ir al dashboard</Button>
       </div>
     </div>
   )

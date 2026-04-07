@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Zap, CheckCircle2, Users, Plus, ChevronDown, ChevronRight } from 'lucide-react'
+import axios from 'axios'
 import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
 import { PageHeader } from '@/shared/components/ui/PageHeader'
@@ -35,6 +36,19 @@ const SERVICE_STATUS_LABELS: Record<string, string> = {
   planned: 'Planificado',
   completed: 'Completado',
   cancelled: 'Cancelado',
+}
+
+function formatLocalDate(dateValue?: string, options?: Intl.DateTimeFormatOptions) {
+  if (!dateValue) return '—'
+  const [year, month, day] = dateValue.slice(0, 10).split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('es-CL', options)
+}
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    return error.response?.data?.error?.message ?? fallback
+  }
+  return fallback
 }
 
 function AgendaServiceRow({ service, programId }: { service: AgendaServiceDetailDTO; programId: string }) {
@@ -104,11 +118,10 @@ function AgendaServiceRow({ service, programId }: { service: AgendaServiceDetail
         </div>
       </div>
 
-      {/* Participants Dialog */}
       <Dialog open={participantsOpen} onOpenChange={setParticipantsOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Participantes — {service.service_type_name}</DialogTitle>
+            <DialogTitle>Participantes - {service.service_type_name}</DialogTitle>
           </DialogHeader>
           {loadingPart ? (
             <p className="text-sm text-muted-foreground py-4 text-center">Cargando...</p>
@@ -169,13 +182,12 @@ function AgendaRow({ agenda, programId }: { agenda: AgendaWithServicesDTO; progr
       setAddServiceOpen(false)
       setNewServiceTypeId('')
       setNewWorkerId('')
-    } catch {
-      toast.error('Error al agregar servicio')
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Error al agregar servicio'))
     }
   }
 
-  const date = new Date(agenda.scheduled_date)
-  const dateLabel = date.toLocaleDateString('es-CL', { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' })
+  const dateLabel = formatLocalDate(agenda.scheduled_date, { weekday: 'long', day: '2-digit', month: 'short', year: 'numeric' })
 
   return (
     <div className="border rounded-lg">
@@ -312,7 +324,6 @@ export function ProgramDetailPage() {
         />
       </div>
 
-      {/* Program summary */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
@@ -323,11 +334,11 @@ export function ProgramDetailPage() {
         <CardContent className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
           <div>
             <p className="text-muted-foreground text-xs mb-0.5">Inicio</p>
-            <p>{new Date(program.start_date).toLocaleDateString('es-CL')}</p>
+            <p>{formatLocalDate(program.start_date)}</p>
           </div>
           <div>
             <p className="text-muted-foreground text-xs mb-0.5">Fin</p>
-            <p>{program.end_date ? new Date(program.end_date).toLocaleDateString('es-CL') : '—'}</p>
+            <p>{program.end_date ? formatLocalDate(program.end_date) : '—'}</p>
           </div>
           {program.notes && (
             <div className="col-span-2">
@@ -338,7 +349,6 @@ export function ProgramDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Agendas */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">

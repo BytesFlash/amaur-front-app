@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { createBrowserRouter, Navigate, useLocation } from 'react-router-dom'
 import { AuthGuard } from '@/shared/components/guards/AuthGuard'
 import { PermissionGuard } from '@/shared/components/guards/PermissionGuard'
 import { AppLayout } from '@/shared/components/layout/AppLayout'
@@ -38,8 +38,45 @@ import { AppointmentFormPage } from '@/modules/appointments/pages/AppointmentFor
 import { AppointmentWizardPage } from '@/modules/appointments/pages/AppointmentWizardPage'
 import { ServiceTypeListPage } from '@/modules/visits/pages/ServiceTypeListPage'
 import { WorkerCalendarPage } from '@/modules/workers/pages/WorkerCalendarPage'
+import { LandingPage } from '@/modules/marketing/pages/LandingPage'
+
+const legacyAppPrefixes = [
+  '/dashboard',
+  '/patients',
+  '/companies',
+  '/workers',
+  '/agendas',
+  '/visits',
+  '/contracts',
+  '/care-sessions',
+  '/programs',
+  '/appointments',
+  '/service-types',
+  '/users',
+  '/roles',
+  '/settings',
+]
+
+function LegacyAppRedirect() {
+  const location = useLocation()
+  const target = `/app${location.pathname}${location.search}${location.hash}`
+  const isLegacyAppPath = legacyAppPrefixes.some(
+    (prefix) => location.pathname === prefix || location.pathname.startsWith(`${prefix}/`),
+  )
+
+  if (isLegacyAppPath) {
+    return <Navigate to={target} replace />
+  }
+
+  return <Navigate to="/" replace />
+}
 
 export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <LandingPage />,
+    errorElement: <RouteErrorPage />,
+  },
   {
     path: '/login',
     element: <LoginPage />,
@@ -53,12 +90,13 @@ export const router = createBrowserRouter([
   {
     element: <AuthGuard />,
     errorElement: <RouteErrorPage />,
+    path: '/app',
     children: [
       {
         element: <AppLayout />,
         errorElement: <RouteErrorPage />,
         children: [
-          { index: true, element: <Navigate to="/dashboard" replace /> },
+          { index: true, element: <Navigate to="/app/dashboard" replace /> },
           { path: 'dashboard', element: <DashboardPage /> },
 
           // Patients
@@ -270,5 +308,5 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  { path: '*', element: <Navigate to="/login" replace /> },
+  { path: '*', element: <LegacyAppRedirect /> },
 ])

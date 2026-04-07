@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
+import axios from 'axios'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
@@ -80,6 +81,13 @@ function formatScheduledAt(scheduledAt: string): string {
   const hh = String(d.getHours()).padStart(2, '0')
   const mm = String(d.getMinutes()).padStart(2, '0')
   return `${days[d.getDay()]} ${d.getDate()} de ${months[d.getMonth()]} ${d.getFullYear()} a las ${hh}:${mm}`
+}
+
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    return error.response?.data?.error?.message ?? fallback
+  }
+  return fallback
 }
 
 // ─── Wizard state ────────────────────────────────────────────────────────────
@@ -199,8 +207,8 @@ export function AppointmentWizardPage() {
       })
       toast.success('Cita agendada correctamente')
       navigate('/appointments')
-    } catch {
-      toast.error('Error al agendar la cita')
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Error al agendar la cita'))
     }
   }
 

@@ -13,6 +13,12 @@ const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline' | 'des
   draft: 'outline', active: 'default', paused: 'secondary', expired: 'destructive', terminated: 'destructive',
 }
 
+function formatLocalDate(dateValue?: string) {
+  if (!dateValue) return '—'
+  const [year, month, day] = dateValue.slice(0, 10).split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('es-CL')
+}
+
 export function ContractDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -53,11 +59,11 @@ export function ContractDetailPage() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Fecha inicio</p>
-              <p className="font-medium">{new Date(contract.start_date).toLocaleDateString('es-CL')}</p>
+              <p className="font-medium">{formatLocalDate(contract.start_date)}</p>
             </div>
             <div>
               <p className="text-xs text-muted-foreground">Fecha vencimiento</p>
-              <p className="font-medium">{contract.end_date ? new Date(contract.end_date).toLocaleDateString('es-CL') : '—'}</p>
+              <p className="font-medium">{contract.end_date ? formatLocalDate(contract.end_date) : '—'}</p>
             </div>
             {contract.value_clp != null && (
               <div>
@@ -68,7 +74,7 @@ export function ContractDetailPage() {
             {contract.renewal_date && (
               <div>
                 <p className="text-xs text-muted-foreground">Renovación</p>
-                <p className="font-medium">{new Date(contract.renewal_date).toLocaleDateString('es-CL')}</p>
+                <p className="font-medium">{formatLocalDate(contract.renewal_date)}</p>
               </div>
             )}
             {contract.notes && (

@@ -26,6 +26,12 @@ const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline' | 'des
   cancelled: 'destructive',
 }
 
+function formatLocalDate(dateValue?: string) {
+  if (!dateValue) return '—'
+  const [year, month, day] = dateValue.slice(0, 10).split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('es-CL')
+}
+
 export function ProgramListPage() {
   const navigate = useNavigate()
   const { hasPermission } = usePermission()
@@ -37,14 +43,14 @@ export function ProgramListPage() {
     {
       accessorKey: 'start_date',
       header: 'Inicio',
-      cell: ({ getValue }) => new Date(getValue<string>()).toLocaleDateString('es-CL'),
+      cell: ({ getValue }) => formatLocalDate(getValue<string>()),
     },
     {
       accessorKey: 'end_date',
       header: 'Fin',
       cell: ({ getValue }) => {
         const v = getValue<string>()
-        return v ? new Date(v).toLocaleDateString('es-CL') : '—'
+        return v ? formatLocalDate(v) : '—'
       },
     },
     {

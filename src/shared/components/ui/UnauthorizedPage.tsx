@@ -13,7 +13,7 @@ export function UnauthorizedPage() {
         </p>
       </div>
       <Button asChild>
-        <Link to="/dashboard">Volver al inicio</Link>
+        <Link to="/app/dashboard">Volver al inicio</Link>
       </Button>
     </div>
   )

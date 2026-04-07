@@ -15,6 +15,7 @@ import { useProgram, useCreateProgram, useUpdateProgram } from '../hooks/useProg
 import { useCompanies } from '@/modules/companies/hooks/useCompanies'
 import { useContracts } from '@/modules/contracts/hooks/useContracts'
 import { useServiceTypes } from '@/modules/visits/hooks/useServiceTypes'
+import { useWorkers } from '@/modules/workers/hooks/useWorkers'
 import { toast } from 'sonner'
 
 const WEEKDAY_LABELS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
@@ -26,6 +27,7 @@ const ruleSchema = z.object({
   frequency_interval_weeks: z.coerce.number().int().min(1).default(1),
   max_occurrences: z.coerce.number().int().min(1).optional().or(z.literal('')).transform((v) => (v === '' ? undefined : Number(v))),
   service_type_id: z.string().optional(),
+  worker_id: z.string().optional(),
 })
 
 const schema = z.object({
@@ -53,6 +55,8 @@ export function ProgramFormPage() {
   const companies = companiesData?.data ?? []
   const { data: serviceTypesData } = useServiceTypes()
   const serviceTypes = serviceTypesData ?? []
+  const { data: workersData } = useWorkers({ active: true, limit: 200 } as Parameters<typeof useWorkers>[0])
+  const workers = workersData?.data ?? []
 
   const {
     register,
@@ -104,6 +108,7 @@ export function ProgramFormPage() {
           frequency_interval_weeks: r.frequency_interval_weeks,
           max_occurrences: r.max_occurrences,
           service_type_id: r.service_type_id ?? '',
+          worker_id: r.worker_id ?? '',
         })),
       })
     }
@@ -126,6 +131,7 @@ export function ProgramFormPage() {
           frequency_interval_weeks: r.frequency_interval_weeks,
           max_occurrences: r.max_occurrences || undefined,
           service_type_id: r.service_type_id || undefined,
+          worker_id: r.worker_id || undefined,
         })),
       }
       if (isEdit) {
@@ -151,6 +157,7 @@ export function ProgramFormPage() {
       frequency_interval_weeks: 1,
       max_occurrences: undefined,
       service_type_id: '',
+      worker_id: '',
     })
   }
 
@@ -282,7 +289,7 @@ export function ProgramFormPage() {
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
                   <div className="flex flex-col gap-1.5">
                     <Label className="text-xs">Día de semana</Label>
                     <Controller
@@ -338,6 +345,31 @@ export function ProgramFormPage() {
                             {serviceTypes.map((st) => (
                               <SelectItem key={st.id} value={st.id}>
                                 {st.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <Label className="text-xs">Profesional</Label>
+                    <Controller
+                      control={control}
+                      name={`rules.${index}.worker_id`}
+                      render={({ field: f }) => (
+                        <Select
+                          value={f.value || 'none'}
+                          onValueChange={(v) => f.onChange(v === 'none' ? '' : v)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Sin asignar" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">Sin asignar</SelectItem>
+                            {workers.map((worker) => (
+                              <SelectItem key={worker.id} value={worker.id}>
+                                {worker.first_name} {worker.last_name}
                               </SelectItem>
                             ))}
                           </SelectContent>

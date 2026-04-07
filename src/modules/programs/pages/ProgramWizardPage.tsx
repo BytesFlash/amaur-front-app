@@ -8,6 +8,7 @@ import {
   Trash2,
   AlertTriangle,
 } from 'lucide-react'
+import axios from 'axios'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
@@ -25,15 +26,13 @@ import {
 import { Separator } from '@/shared/components/ui/separator'
 import { cn } from '@/shared/utils/cn'
 import { useCompanies } from '@/modules/companies/hooks/useCompanies'
-import { useContracts } from '@/modules/contracts/hooks/useContracts'
+import { useContract, useContracts } from '@/modules/contracts/hooks/useContracts'
 import { useServiceTypes } from '@/modules/visits/hooks/useServiceTypes'
-import { useWorkers, useWorkerAvailability } from '@/modules/workers/hooks/useWorkers'
+import { useWorkers, useWorkerAvailability, useWorkerSlots } from '@/modules/workers/hooks/useWorkers'
 import { useCreateProgram } from '../hooks/usePrograms'
 import { programsApi } from '../api/programsApi'
 import type { AvailabilityRuleDTO } from '@/modules/workers/api/workersApi'
 import { toast } from 'sonner'
-
-// ─── Types ───────────────────────────────────────────────────────────────────
 
 const WEEKDAY_LABELS = [
   'Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado',
@@ -45,7 +44,7 @@ type RuleData = {
   duration_minutes: number
   frequency_interval_weeks: number
   max_occurrences: number | ''
-  worker_id: string // planning only, not persisted in rule
+  worker_id: string
 }
 
 type WizardData = {
@@ -94,7 +93,53 @@ const STEPS = [
   { num: 4, label: 'Confirmar' },
 ]
 
-// ─── Availability indicator sub-component ─────────────────────────────────
+function getApiErrorMessage(error: unknown, fallback: string) {
+  if (axios.isAxiosError(error)) {
+    return error.response?.data?.error?.message ?? fallback
+  }
+  return fallback
+}
+
+function buildLocalDate(dateValue: string) {
+  const [year, month, day] = dateValue.slice(0, 10).split('-').map(Number)
+  return new Date(year, month - 1, day)
+}
+
+function formatLocalDate(dateValue?: string) {
+  if (!dateValue) return '—'
+  return buildLocalDate(dateValue).toLocaleDateString('es-CL')
+}
+
+function firstOccurrenceForRule(startDate: string, weekday: number) {
+  if (!startDate) return ''
+  const date = buildLocalDate(startDate)
+  while (date.getDay() !== weekday) {
+    date.setDate(date.getDate() + 1)
+  }
+  return date.toISOString().slice(0, 10)
+}
+
+function mondayForDate(dateValue: string) {
+  if (!dateValue) return ''
+  const date = buildLocalDate(dateValue)
+  const diff = date.getDay() === 0 ? -6 : 1 - date.getDay()
+  date.setDate(date.getDate() + diff)
+  return date.toISOString().slice(0, 10)
+}
+
+function effectiveRuleEndDate(programEnd: string, contractEnd?: string) {
+  if (programEnd && contractEnd) {
+    return programEnd < contractEnd ? programEnd : contractEnd
+  }
+  return programEnd || contractEnd || ''
+}
+
+function frequencyLabel(weeks: number) {
+  if (weeks === 1) return 'semanal'
+  if (weeks === 2) return 'quincenal'
+  if (weeks === 4) return 'cada 4 semanas'
+  return `cada ${weeks} semanas`
+}
 
 function AvailabilityIndicator({
   workerId,
@@ -109,7 +154,6 @@ function AvailabilityIndicator({
 
   if (!workerId) return null
   if (isLoading) return <p className="text-xs text-muted-foreground">Verificando disponibilidad...</p>
-  // If there was an error (e.g. 403 permission denied) don't show a misleading "no schedule" warning
   if (isError || rulesRaw === undefined) return null
 
   const rules = rulesRaw ?? []
@@ -148,7 +192,7 @@ function AvailabilityIndicator({
   }
 
   if (!isAvailable) {
-    const ranges = dayRules.map((r: AvailabilityRuleDTO) => `${r.start_time}–${r.end_time}`).join(', ')
+    const ranges = dayRules.map((r: AvailabilityRuleDTO) => `${r.start_time}-${r.end_time}`).join(', ')
     return (
       <div className="flex items-center gap-1 text-amber-600 text-xs">
         <AlertTriangle className="h-3 w-3 shrink-0" />
@@ -165,7 +209,82 @@ function AvailabilityIndicator({
   )
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+function OccupancyIndicator({
+  workerId,
+  startDate,
+  weekday,
+  startTime,
+  durationMinutes,
+}: {
+  workerId: string
+  startDate: string
+  weekday: number
+  startTime: string
+  durationMinutes: number
+}) {
+  const firstOccurrence = firstOccurrenceForRule(startDate, weekday)
+  const weekStart = mondayForDate(firstOccurrence)
+  const { data: slots = [], isFetching } = useWorkerSlots(workerId, weekStart, durationMinutes)
+
+  if (!workerId || !startDate || !firstOccurrence || !weekStart) return null
+  if (isFetching) return <p className="text-xs text-muted-foreground">Revisando ocupación del profesional...</p>
+
+  const currentSlot = slots.find((slot) => slot.date === firstOccurrence && slot.start_time === startTime)
+  if (!currentSlot) return null
+  if (!currentSlot.available) {
+    return (
+      <div className="flex items-center gap-1 text-amber-600 text-xs">
+        <AlertTriangle className="h-3 w-3 shrink-0" />
+        <span>El primer bloque cae en un horario ya ocupado para este profesional.</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-1 text-green-600 text-xs">
+      <Check className="h-3 w-3 shrink-0" />
+      <span>El primer bloque está libre en la agenda del profesional.</span>
+    </div>
+  )
+}
+
+function RuleContractIndicator({
+  startDate,
+  endDate,
+  contractEndDate,
+  weekday,
+  frequencyIntervalWeeks,
+}: {
+  startDate: string
+  endDate: string
+  contractEndDate?: string
+  weekday: number
+  frequencyIntervalWeeks: number
+}) {
+  if (!startDate) return null
+
+  const effectiveEnd = effectiveRuleEndDate(endDate, contractEndDate)
+  const firstOccurrence = firstOccurrenceForRule(startDate, weekday)
+
+  if (!firstOccurrence) return null
+  if (effectiveEnd && firstOccurrence > effectiveEnd) {
+    return (
+      <div className="flex items-center gap-1 text-amber-600 text-xs">
+        <AlertTriangle className="h-3 w-3 shrink-0" />
+        <span>La primera sesión quedaría fuera del período vigente del programa o contrato.</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-1 text-muted-foreground text-xs">
+      <Check className="h-3 w-3 shrink-0 text-green-600" />
+      <span>
+        Primera sesión estimada: {formatLocalDate(firstOccurrence)} ({WEEKDAY_LABELS[weekday]}), frecuencia {frequencyLabel(frequencyIntervalWeeks)}.
+      </span>
+    </div>
+  )
+}
 
 export function ProgramWizardPage() {
   const navigate = useNavigate()
@@ -173,7 +292,6 @@ export function ProgramWizardPage() {
   const [data, setData] = useState<WizardData>(INITIAL)
   const createMutation = useCreateProgram()
 
-  // Queries
   const { data: companiesData } = useCompanies({ limit: 200 })
   const companies = companiesData?.data ?? []
 
@@ -181,6 +299,7 @@ export function ProgramWizardPage() {
     data.companyId ? { company_id: data.companyId, limit: 50 } : undefined,
   )
   const contracts = contractsData?.data ?? []
+  const { data: selectedContract } = useContract(data.contractId)
 
   const { data: serviceTypes = [] } = useServiceTypes(true)
   const groupServiceTypes = serviceTypes.filter((st) => st.is_group_service)
@@ -188,7 +307,6 @@ export function ProgramWizardPage() {
   const { data: workersData } = useWorkers({ active: true, limit: 200 })
   const workers = workersData?.data ?? []
 
-  // Reset contract when company changes
   useEffect(() => {
     setData((prev) => ({ ...prev, contractId: '', contractName: '' }))
   }, [data.companyId])
@@ -250,20 +368,17 @@ export function ProgramWizardPage() {
           worker_id: r.worker_id || undefined,
         })),
       })
-      // Auto-generate agendas immediately so they show up in the worker calendar
       try {
         const gen = await programsApi.generateAgendas(created.id)
         toast.success(`Programa creado con ${gen.count} sesión(es) generada(s).`)
-      } catch {
-        toast.error('Programa creado, pero falló la generación de sesiones. Usa "Regenerar agendas" desde el detalle.')
+      } catch (error) {
+        toast.error(getApiErrorMessage(error, 'Programa creado, pero falló la generación de sesiones.'))
       }
       navigate(`/programs/${created.id}`)
-    } catch {
-      toast.error('Error al crear el programa')
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, 'Error al crear el programa'))
     }
   }
-
-  // ─── Step renderers ──────────────────────────────────────────────────────
 
   function renderStep1() {
     return (
@@ -326,6 +441,12 @@ export function ProgramWizardPage() {
               No hay contratos para esta empresa. Crea uno antes de continuar.
             </p>
           )}
+          {selectedContract && (
+            <div className="mt-2 rounded-md border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+              Vigencia del contrato: {formatLocalDate(selectedContract.start_date)}
+              {selectedContract.end_date ? ` al ${formatLocalDate(selectedContract.end_date)}` : ' sin fecha de término'}.
+            </div>
+          )}
         </div>
       </div>
     )
@@ -338,8 +459,7 @@ export function ProgramWizardPage() {
           <Label className="mb-3 block font-medium">Tipo de servicio (grupal) *</Label>
           {groupServiceTypes.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No hay tipos de servicio grupales configurados. Configúralos en{' '}
-              <strong>Tipos de servicio</strong>.
+              No hay tipos de servicio grupales configurados. Configúralos en <strong>Tipos de servicio</strong>.
             </p>
           ) : (
             <div className="grid gap-3 sm:grid-cols-2">
@@ -398,6 +518,8 @@ export function ProgramWizardPage() {
               type="date"
               value={data.startDate}
               onChange={(e) => patch({ startDate: e.target.value })}
+              min={selectedContract?.start_date?.slice(0, 10)}
+              max={selectedContract?.end_date?.slice(0, 10)}
             />
           </div>
           <div>
@@ -406,9 +528,18 @@ export function ProgramWizardPage() {
               type="date"
               value={data.endDate}
               onChange={(e) => patch({ endDate: e.target.value })}
+              min={data.startDate || selectedContract?.start_date?.slice(0, 10)}
             />
           </div>
         </div>
+        {selectedContract && (
+          <div className="rounded-md border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+            El programa puede comenzar desde {formatLocalDate(selectedContract.start_date)}.
+            {selectedContract.end_date
+              ? ` Si la fecha final supera ${formatLocalDate(selectedContract.end_date)}, las sesiones se generarán solo hasta el término del contrato.`
+              : ' Al no existir término de contrato, la fecha final del programa controlará la generación.'}
+          </div>
+        )}
       </div>
     )
   }
@@ -440,7 +571,6 @@ export function ProgramWizardPage() {
               </Button>
             </div>
 
-            {/* Schedule fields */}
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div>
                 <Label className="mb-1 block text-xs">Día de semana</Label>
@@ -495,7 +625,7 @@ export function ProgramWizardPage() {
                 </Select>
               </div>
               <div>
-                <Label className="mb-1 block text-xs">Nº sesiones (dejar vacío = sin límite)</Label>
+                <Label className="mb-1 block text-xs">N° sesiones (vacío = sin límite)</Label>
                 <Input
                   type="number"
                   min={1}
@@ -515,7 +645,6 @@ export function ProgramWizardPage() {
 
             <Separator />
 
-            {/* Professional assignment */}
             <div>
               <Label className="mb-1 block text-xs">Profesional asignado (planificación)</Label>
               <Select
@@ -537,11 +666,25 @@ export function ProgramWizardPage() {
               </Select>
 
               {rule.worker_id && (
-                <div className="mt-2">
+                <div className="mt-2 space-y-1">
+                  <RuleContractIndicator
+                    startDate={data.startDate}
+                    endDate={data.endDate}
+                    contractEndDate={selectedContract?.end_date?.slice(0, 10)}
+                    weekday={rule.weekday}
+                    frequencyIntervalWeeks={rule.frequency_interval_weeks}
+                  />
                   <AvailabilityIndicator
                     workerId={rule.worker_id}
                     weekday={rule.weekday}
                     startTime={rule.start_time}
+                  />
+                  <OccupancyIndicator
+                    workerId={rule.worker_id}
+                    startDate={data.startDate}
+                    weekday={rule.weekday}
+                    startTime={rule.start_time}
+                    durationMinutes={rule.duration_minutes}
                   />
                 </div>
               )}
@@ -585,6 +728,22 @@ export function ProgramWizardPage() {
                 {data.endDate ? ` → ${data.endDate}` : ' (sin fecha fin)'}
               </span>
             </div>
+            {selectedContract && (
+              <>
+                <div className="flex justify-between gap-4">
+                  <span className="text-muted-foreground">Vigencia contrato</span>
+                  <span className="font-medium">
+                    {formatLocalDate(selectedContract.start_date)}
+                    {selectedContract.end_date ? ` → ${formatLocalDate(selectedContract.end_date)}` : ' (sin fecha fin)'}
+                  </span>
+                </div>
+                {data.endDate && selectedContract.end_date && data.endDate > selectedContract.end_date && (
+                  <div className="rounded-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+                    El programa supera el rango del contrato. Se guardará, pero la generación de sesiones se cortará en la fecha de término contractual.
+                  </div>
+                )}
+              </>
+            )}
             <Separator />
             <div>
               <span className="text-muted-foreground">Bloques de sesión ({data.rules.length})</span>
@@ -626,8 +785,7 @@ export function ProgramWizardPage() {
         </Card>
 
         <p className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-          <strong>Nota:</strong> Los profesionales se confirman y asignan sesión a sesión desde el
-          detalle del programa, una vez creado.
+          <strong>Nota:</strong> Los profesionales se confirman y asignan sesión a sesión desde el detalle del programa, una vez creado.
         </p>
 
         <div>
@@ -662,8 +820,6 @@ export function ProgramWizardPage() {
     }
   }
 
-  // ─── Render ───────────────────────────────────────────────────────────────
-
   return (
     <div className="mx-auto max-w-2xl space-y-6">
       <PageHeader
@@ -676,7 +832,6 @@ export function ProgramWizardPage() {
         }
       />
 
-      {/* Stepper */}
       <div className="flex items-center">
         {STEPS.map((s, i) => (
           <div key={s.num} className="flex flex-1 items-center">
@@ -714,7 +869,6 @@ export function ProgramWizardPage() {
         ))}
       </div>
 
-      {/* Step content */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-base">{STEPS[step - 1].label}</CardTitle>
@@ -722,7 +876,6 @@ export function ProgramWizardPage() {
         <CardContent>{renderCurrentStep()}</CardContent>
       </Card>
 
-      {/* Navigation */}
       {step < 4 && (
         <div className="flex items-center justify-between">
           {step > 1 ? (

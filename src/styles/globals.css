@@ -4,26 +4,30 @@
 
 @layer base {
   :root {
-    --background: 220 14% 96%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 45 33% 97%;
+    --foreground: 201 31% 15%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 201 31% 15%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 142 76% 36%;
+    --popover-foreground: 201 31% 15%;
+    --primary: 171 69% 29%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --secondary: 43 42% 93%;
+    --secondary-foreground: 201 31% 15%;
+    --muted: 45 25% 94%;
+    --muted-foreground: 198 15% 38%;
+    --accent: 162 34% 92%;
+    --accent-foreground: 201 31% 15%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142 76% 36%;
-    --radius: 0.5rem;
+    --border: 167 18% 84%;
+    --input: 167 18% 84%;
+    --ring: 171 69% 29%;
+    --radius: 1rem;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   * {
@@ -32,6 +36,48 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: "Aptos", "Segoe UI Variable Display", "Trebuchet MS", sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  .hero-orbit {
+    animation: amaur-orbit 18s linear infinite;
+  }
+
+  .hero-orbit-delayed {
+    animation-duration: 24s;
+    animation-direction: reverse;
+  }
+
+  .amaur-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 9999px;
+    background: white;
+    border: 2px solid rgba(15, 23, 42, 0.7);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+  }
+
+  .amaur-range::-moz-range-thumb {
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 9999px;
+    background: white;
+    border: 2px solid rgba(15, 23, 42, 0.7);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+  }
+}
+
+@keyframes amaur-orbit {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }

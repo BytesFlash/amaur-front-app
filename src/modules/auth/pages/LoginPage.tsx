@@ -25,7 +25,7 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/dashboard'
+  const from = (location.state as { from?: { pathname: string } })?.from?.pathname ?? '/app/dashboard'
 
   const {
     register,
