@@ -1,5 +1,5 @@
 ﻿import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Pencil, Plus, Building2, AlertTriangle, Stethoscope, Pill, Shield, ClipboardList, CheckCircle2, XCircle, UserCheck, Users, LogIn } from 'lucide-react'
+import { ArrowLeft, Pencil, Building2, AlertTriangle, Stethoscope, Pill, Shield, ClipboardList, CheckCircle2, XCircle, UserCheck, Users, LogIn } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs'
@@ -7,7 +7,7 @@ import { PageHeader } from '@/shared/components/ui/PageHeader'
 import { StatusBadge } from '@/shared/components/ui/StatusBadge'
 import { Badge } from '@/shared/components/ui/badge'
 import { usePatient, useClinicalRecord, useUpdateClinicalRecord, usePatientLoginInfo } from '../hooks/usePatients'
-import { useCareSessions } from '@/modules/careSessions/hooks/useCareSessions'
+import { useAppointment, useAppointments } from '@/modules/appointments/hooks/useAppointments'
 import { formatDate } from '@/shared/utils/formatDate'
 import { formatRut } from '@/shared/utils/formatRut'
 import { usePermission } from '@/shared/hooks/usePermission'
@@ -17,6 +17,7 @@ import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import { toast } from 'sonner'
+import { APPOINTMENT_STATUS_LABELS, APPOINTMENT_STATUS_VARIANTS } from '@/modules/appointments/lib/status'
 
 const GENDER_LABELS: Record<string, string> = {
   masculino: 'Masculino', femenino: 'Femenino', otro: 'Otro', prefiero_no_decir: 'Prefiero no decir',
@@ -24,14 +25,6 @@ const GENDER_LABELS: Record<string, string> = {
 const TYPE_LABELS: Record<string, string> = {
   particular: 'Particular', company: 'De empresa', both: 'Ambos',
 }
-const SESSION_TYPE_LABELS: Record<string, string> = {
-  company_visit: 'Visita empresa', particular: 'Particular',
-}
-const SESSION_STATUS_BADGES: Record<string, string> = {
-  completed: 'bg-green-100 text-green-800', scheduled: 'bg-blue-100 text-blue-800',
-  cancelled: 'bg-red-100 text-red-800', no_show: 'bg-yellow-100 text-yellow-800',
-}
-
 export function PatientDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -42,10 +35,11 @@ export function PatientDetailPage() {
   const updateRecord = useUpdateClinicalRecord(id!)
   const { data: loginInfo } = usePatientLoginInfo(id!, true)
 
-  const { data: sessionsData } = useCareSessions({ patient_id: id, limit: 50 })
-  const sessions = sessionsData?.data ?? []
+  const { data: appointmentsData } = useAppointments({ patient_id: id, limit: 50 })
+  const appointments = appointmentsData?.data ?? []
 
   const [editingRecord, setEditingRecord] = useState(false)
+  const [expandedAppointmentId, setExpandedAppointmentId] = useState<string | null>(null)
   const [recordForm, setRecordForm] = useState<Record<string, string | boolean>>({})
 
   function startEditRecord() {
@@ -101,7 +95,7 @@ export function PatientDetailPage() {
         <TabsList>
           <TabsTrigger value="datos">Datos personales</TabsTrigger>
           <TabsTrigger value="ficha">Ficha clinica</TabsTrigger>
-          <TabsTrigger value="historial">Historial ({sessions.length})</TabsTrigger>
+          <TabsTrigger value="historial">Historial de citas ({appointments.length})</TabsTrigger>
         </TabsList>
 
         {/* Datos personales */}
@@ -382,54 +376,57 @@ export function PatientDetailPage() {
           </Card>
         </TabsContent>
 
-        {/* Historial de atenciones */}
+        {/* Historial de citas */}
         <TabsContent value="historial" className="mt-4">
           <div className="space-y-3">
-            {hasPermission('care_sessions:create') && (
-              <div className="flex justify-end">
-                <Button asChild size="sm">
-                  <Link to={`/care-sessions/new?patient_id=${patient.id}`}>
-                    <Plus className="mr-1.5 h-3.5 w-3.5" />Nueva atencion
-                  </Link>
-                </Button>
-              </div>
+            {appointments.length === 0 && (
+              <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">No hay citas registradas.</p></CardContent></Card>
             )}
-            {sessions.length === 0 && (
-              <Card><CardContent className="pt-6"><p className="text-sm text-muted-foreground">No hay atenciones registradas.</p></CardContent></Card>
-            )}
-            {sessions.map((s) => (
-              <Card key={s.id} className="hover:border-primary/30 transition-colors">
+            {appointments.map((a) => (
+              <Card key={a.id} className="hover:border-primary/30 transition-colors">
                 <CardContent className="pt-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="font-medium text-sm">{s.service_type_name ?? 'Atencion'}</span>
-                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${SESSION_STATUS_BADGES[s.status] ?? ''}`}>
-                          {s.status}
-                        </span>
-                        <span className="text-xs text-muted-foreground">{SESSION_TYPE_LABELS[s.session_type]}</span>
-                        {s.company_name && (
+                        <span className="font-medium text-sm">{a.service_type_name ?? 'Cita'}</span>
+                        <Badge variant={APPOINTMENT_STATUS_VARIANTS[a.status] ?? 'outline'} className="text-xs">
+                          {APPOINTMENT_STATUS_LABELS[a.status] ?? a.status}
+                        </Badge>
+                        {a.company_name && (
                           <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Building2 className="h-3 w-3" />{s.company_name}
+                            <Building2 className="h-3 w-3" />{a.company_name}
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        {formatDate(s.session_date)} {s.session_time ? ` ${s.session_time}` : ''}
-                        {s.duration_minutes ? `  ${s.duration_minutes} min` : ''}
+                        {formatDate(a.scheduled_at)} {a.duration_minutes ? `  ${a.duration_minutes} min` : ''}
                       </p>
-                      {s.worker_first_name && (
-                        <p className="text-xs text-muted-foreground mt-0.5">Prof: {s.worker_first_name} {s.worker_last_name}</p>
+                      {a.worker_name && (
+                        <p className="text-xs text-muted-foreground mt-0.5">Prof: {a.worker_name}</p>
                       )}
-                      {s.notes && <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{s.notes}</p>}
-                      {s.follow_up_required && (
-                        <Badge variant="outline" className="mt-2 text-xs border-orange-300 text-orange-700">Seguimiento pendiente</Badge>
+                      {a.chief_complaint && (
+                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                          Motivo: {a.chief_complaint}
+                        </p>
+                      )}
+                      {a.follow_up_required && (
+                        <Badge variant="outline" className="mt-2 text-xs border-orange-300 text-orange-700">
+                          Seguimiento pendiente
+                        </Badge>
                       )}
                     </div>
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link to={`/care-sessions/${s.id}`}>Ver</Link>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      type="button"
+                      onClick={() => setExpandedAppointmentId((current) => (current === a.id ? null : a.id))}
+                    >
+                      {expandedAppointmentId === a.id ? 'Ocultar' : 'Ver'}
                     </Button>
                   </div>
+                  {expandedAppointmentId === a.id ? (
+                    <AppointmentInlineDetail appointmentId={a.id} />
+                  ) : null}
                 </CardContent>
               </Card>
             ))}
@@ -463,6 +460,61 @@ function RecordSection({ title, value }: { title: string; value: string }) {
     <div className="rounded-lg border bg-muted/30 p-4">
       <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">{title}</p>
       <p className="text-sm whitespace-pre-wrap">{value}</p>
+    </div>
+  )
+}
+
+function AppointmentInlineDetail({ appointmentId }: { appointmentId: string }) {
+  const { data: appointment, isLoading } = useAppointment(appointmentId)
+
+  if (isLoading) {
+    return <div className="mt-4 h-20 animate-pulse rounded-md bg-muted" />
+  }
+
+  if (!appointment) {
+    return (
+      <div className="mt-4 rounded-md border border-dashed p-3 text-xs text-muted-foreground">
+        No se pudo cargar el detalle de la cita.
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-4 space-y-3 rounded-lg border bg-muted/20 p-4">
+      <div className="flex flex-wrap items-center gap-2">
+        <Badge variant={APPOINTMENT_STATUS_VARIANTS[appointment.status] ?? 'outline'} className="text-xs">
+          {APPOINTMENT_STATUS_LABELS[appointment.status] ?? appointment.status}
+        </Badge>
+        <span className="text-xs text-muted-foreground">
+          {formatDate(appointment.scheduled_at)} {appointment.duration_minutes ? ` ${appointment.duration_minutes} min` : ''}
+        </span>
+      </div>
+
+      <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+        <Field label="Servicio" value={appointment.service_type_name ?? '-'} />
+        <Field label="Profesional" value={appointment.worker_name ?? '-'} />
+        <Field label="Modalidad" value={appointment.company_id ? 'Empresa' : 'Particular'} />
+        <Field label="Empresa" value={appointment.company_name ?? '-'} />
+      </dl>
+
+      {(appointment.chief_complaint || appointment.subjective || appointment.objective || appointment.assessment || appointment.plan || appointment.notes) ? (
+        <div className="space-y-2 rounded-md border bg-white p-3">
+          {appointment.chief_complaint ? <RecordSection title="Motivo de consulta" value={appointment.chief_complaint} /> : null}
+          {appointment.subjective ? <RecordSection title="Subjetivo" value={appointment.subjective} /> : null}
+          {appointment.objective ? <RecordSection title="Objetivo" value={appointment.objective} /> : null}
+          {appointment.assessment ? <RecordSection title="Evaluacion" value={appointment.assessment} /> : null}
+          {appointment.plan ? <RecordSection title="Plan" value={appointment.plan} /> : null}
+          {appointment.notes ? <RecordSection title="Notas" value={appointment.notes} /> : null}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">Sin registro clinico guardado para esta cita.</p>
+      )}
+
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" asChild>
+          <Link to={`/app/appointments/${appointment.id}`}>Abrir vista completa</Link>
+        </Button>
+      </div>
     </div>
   )
 }

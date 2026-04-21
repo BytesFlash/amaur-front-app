@@ -1,0 +1,88 @@
+﻿import type { FaqItem } from '@/modules/content/types/cms'
+
+export const faqsSeed: FaqItem[] = [
+  {
+    id: 'faq-servicios-1',
+    pagePath: '/servicios',
+    question: 'Como saber que servicio necesito?',
+    answer: 'Puedes escribirnos por WhatsApp o formulario y te orientamos segun sintomas, objetivos y contexto laboral.',
+    order: 1,
+  },
+  {
+    id: 'faq-servicios-2',
+    pagePath: '/servicios',
+    question: 'Atienden personas y empresas?',
+    answer: 'Si. AMAUR trabaja atencion individual y programas corporativos con enfoque preventivo y terapeutico.',
+    order: 2,
+  },
+  {
+    id: 'faq-kinesiologia-1',
+    pagePath: '/servicios/kinesiologia',
+    question: 'Cuantas sesiones de kinesiologia suelen necesitarse?',
+    answer: 'Depende del caso y objetivos. En la primera evaluacion se define un plan con frecuencia y metas realistas.',
+    order: 1,
+  },
+  {
+    id: 'faq-kinesiologia-2',
+    pagePath: '/servicios/kinesiologia',
+    question: 'La kinesiologia sirve para prevencion?',
+    answer: 'Si. Se puede trabajar movilidad, fuerza y tecnica para reducir recaidas o sobrecargas futuras.',
+    order: 2,
+  },
+  {
+    id: 'faq-terapia-ocupacional-1',
+    pagePath: '/servicios/terapia-ocupacional',
+    question: 'Que aborda la terapia ocupacional en adultos?',
+    answer: 'Aborda autonomia en actividades cotidianas, rutinas, desempeno laboral y adaptaciones del entorno.',
+    order: 1,
+  },
+  {
+    id: 'faq-telemedicina-1',
+    pagePath: '/servicios/telemedicina',
+    question: 'Se puede hacer seguimiento remoto efectivo?',
+    answer: 'Si. Se entregan pautas, ejercicios y control de avances para mantener continuidad sin traslados.',
+    order: 1,
+  },
+  {
+    id: 'faq-masajes-descontracturantes-1',
+    pagePath: '/servicios/masajes-descontracturantes',
+    question: 'Cada cuanto conviene un masaje descontracturante?',
+    answer: 'Depende de la carga fisica y sintomas. Muchas personas inician semanal y luego pasan a mantencion.',
+    order: 1,
+  },
+  {
+    id: 'faq-masajes-relajacion-1',
+    pagePath: '/servicios/masajes-relajacion',
+    question: 'Los masajes de relajacion tambien ayudan al dolor?',
+    answer: 'Pueden disminuir tension general y mejorar descanso. Cuando hay dolor persistente se combinan con evaluacion clinica.',
+    order: 1,
+  },
+  {
+    id: 'faq-pausas-activas-1',
+    pagePath: '/servicios/pausas-activas',
+    question: 'Las pausas activas interrumpen productividad?',
+    answer: 'No. Bien disenadas, ayudan a sostener foco y disminuir fatiga durante la jornada.',
+    order: 1,
+  },
+  {
+    id: 'faq-bienestar-empresarial-1',
+    pagePath: '/servicios/bienestar-empresarial',
+    question: 'Incluye bienestar empresarial y prevencion en terreno?',
+    answer: 'Si. El programa combina bienestar empresarial y acompanamiento preventivo adaptado a oficinas, bodegas y terreno.',
+    order: 1,
+  },
+  {
+    id: 'faq-empresas-1',
+    pagePath: '/empresas',
+    question: 'Que formatos de programa para empresas ofrecen?',
+    answer: 'Programas recurrentes, jornadas puntuales y planes mixtos con indicadores de adopcion y bienestar.',
+    order: 1,
+  },
+  {
+    id: 'faq-contacto-1',
+    pagePath: '/contacto',
+    question: 'En cuanto tiempo responden una cotizacion?',
+    answer: 'Normalmente dentro del mismo dia habil o en maximo 24 horas.',
+    order: 1,
+  },
+]

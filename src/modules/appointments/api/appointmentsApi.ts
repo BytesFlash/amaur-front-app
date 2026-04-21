@@ -10,11 +10,20 @@ export interface AppointmentDTO {
   service_type_id: string
   service_type_name?: string
   company_id?: string
+  company_name?: string
   recurring_group_id?: string
   scheduled_at: string
   duration_minutes?: number
-  status: 'confirmed' | 'completed' | 'cancelled' | 'no_show'
+  status: 'requested' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show'
   notes?: string
+  chief_complaint?: string
+  subjective?: string
+  objective?: string
+  assessment?: string
+  plan?: string
+  follow_up_required?: boolean
+  follow_up_notes?: string
+  follow_up_date?: string
   care_session_id?: string
   created_at: string
 }
@@ -27,6 +36,14 @@ export interface CreateAppointmentInput {
   scheduled_at: string // ISO8601 or "YYYY-MM-DDTHH:MM"
   duration_minutes?: number
   notes?: string
+  chief_complaint?: string
+  subjective?: string
+  objective?: string
+  assessment?: string
+  plan?: string
+  follow_up_required?: boolean
+  follow_up_notes?: string
+  follow_up_date?: string
   session_count?: number   // 1 (default) to 12
   frequency_weeks?: number // 1=weekly, 2=biweekly
 }
@@ -38,6 +55,14 @@ export interface UpdateAppointmentInput {
   duration_minutes?: number
   status?: string
   notes?: string
+  chief_complaint?: string
+  subjective?: string
+  objective?: string
+  assessment?: string
+  plan?: string
+  follow_up_required?: boolean
+  follow_up_notes?: string
+  follow_up_date?: string
 }
 
 export const appointmentsApi = {

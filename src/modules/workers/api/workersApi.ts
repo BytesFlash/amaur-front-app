@@ -85,7 +85,7 @@ export const workersApi = {
   async getSlots(id: string, weekStart: string, durationMinutes: number): Promise<TimeSlotDTO[]> {
     const qs = new URLSearchParams({ week_start: weekStart, duration_minutes: String(durationMinutes) })
     const { data } = await apiClient.get<ApiResponse<TimeSlotDTO[]>>(`/api/v1/workers/${id}/slots?${qs}`)
-    return data.data
+    return Array.isArray(data.data) ? data.data : []
   },
 
   async getCalendar(id: string, month: string): Promise<DayCalendarDTO[]> {
@@ -129,9 +129,15 @@ export interface DayCalendarDTO {
   available_minutes: number
   booked_minutes: number
   appointments: {
+    appointment_id?: string
+    patient_id?: string
+    service_type_id?: string
+    patient_name?: string
+    service_type_name?: string
     scheduled_at: string    // "HH:MM"
     duration_minutes: number
     type: 'individual' | 'group'
     label: string
+    status?: 'requested' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'no_show' | string
   }[]
 }

@@ -14,24 +14,17 @@ import { usePermission } from '@/shared/hooks/usePermission'
 import { useAppointments, useDeleteAppointment } from '../hooks/useAppointments'
 import type { AppointmentDTO } from '../api/appointmentsApi'
 import { toast } from 'sonner'
-
-const STATUS_LABELS: Record<string, string> = {
-  confirmed: 'Confirmada',
-  completed: 'Completada',
-  cancelled: 'Cancelada',
-  no_show: 'Inasistencia',
-}
-
-const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = {
-  confirmed: 'outline',
-  completed: 'default',
-  cancelled: 'destructive',
-  no_show: 'secondary',
-}
+import {
+  APPOINTMENT_STATUS_LABELS,
+  APPOINTMENT_STATUS_VARIANTS,
+} from '../lib/status'
 
 export function AppointmentListPage() {
   const navigate = useNavigate()
   const { hasPermission } = usePermission()
+  const canCreate = hasPermission('appointments:create')
+  const canEdit = hasPermission('appointments:edit')
+  const canDelete = hasPermission('appointments:delete')
   const [statusFilter, setStatusFilter] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
@@ -93,34 +86,48 @@ export function AppointmentListPage() {
       header: 'Estado',
       cell: ({ getValue }) => {
         const s = getValue<string>()
-        return <Badge variant={STATUS_VARIANTS[s] ?? 'outline'}>{STATUS_LABELS[s] ?? s}</Badge>
+        return (
+          <Badge variant={APPOINTMENT_STATUS_VARIANTS[s] ?? 'outline'}>
+            {APPOINTMENT_STATUS_LABELS[s] ?? s}
+          </Badge>
+        )
       },
     },
     {
       id: 'actions',
       header: '',
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigate(`/appointments/${row.original.id}/edit`)}>
-              Editar
-            </DropdownMenuItem>
-            {hasPermission('visits:delete') && (
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={(e) => { e.stopPropagation(); setDeleteId(row.original.id) }}
-              >
-                <Trash2 className="h-4 w-4 mr-2" /> Eliminar
+      cell: ({ row }) => {
+        if (!canEdit && !canDelete) {
+          return null
+        }
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => navigate(`/app/appointments/${row.original.id}`)}>
+                Ver detalle
               </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
+              {canEdit && (
+                <DropdownMenuItem onClick={() => navigate(`/app/appointments/${row.original.id}/edit`)}>
+                  Editar
+                </DropdownMenuItem>
+              )}
+              {canDelete && (
+                <DropdownMenuItem
+                  className="text-destructive"
+                  onClick={(e) => { e.stopPropagation(); setDeleteId(row.original.id) }}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" /> Eliminar
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      },
     },
   ]
 
@@ -144,8 +151,8 @@ export function AppointmentListPage() {
         title="Citas individuales"
         description="Agenda de citas por paciente"
         actions={
-          hasPermission('visits:create') ? (
-            <Button onClick={() => navigate('/appointments/new')}>
+          canCreate ? (
+            <Button onClick={() => navigate('/app/appointments/new')}>
               <Plus className="mr-2 h-4 w-4" />
               Nueva cita
             </Button>
@@ -161,7 +168,9 @@ export function AppointmentListPage() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Todos</SelectItem>
+            <SelectItem value="requested">Solicitada</SelectItem>
             <SelectItem value="confirmed">Confirmada</SelectItem>
+            <SelectItem value="in_progress">Atendiendo</SelectItem>
             <SelectItem value="completed">Completada</SelectItem>
             <SelectItem value="cancelled">Cancelada</SelectItem>
             <SelectItem value="no_show">Inasistencia</SelectItem>
@@ -214,7 +223,11 @@ export function AppointmentListPage() {
               </TableRow>
             ) : (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/50">
+                <TableRow
+                  key={row.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => navigate(`/app/appointments/${row.original.id}`)}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}

@@ -78,14 +78,14 @@ export function UserFormPage() {
       .map((r) => r.name)
     const isProfessional = selectedRoleNames.includes('professional')
     const needsCompanyScope = selectedRoleNames.includes('company_hr') || selectedRoleNames.includes('company_worker')
-    const needsPatientScope = selectedRoleNames.includes('patient')
+    const needsPatientScope = selectedRoleNames.includes('patient') || selectedRoleNames.includes('company_worker')
 
     if (needsCompanyScope && !values.company_id) {
       toast.error('Debes seleccionar una empresa para este rol')
       return
     }
     if (needsPatientScope && !values.patient_id) {
-      toast.error('Debes seleccionar un paciente para el rol patient')
+      toast.error('Debes seleccionar un paciente para este rol')
       return
     }
 
@@ -176,7 +176,7 @@ export function UserFormPage() {
                     .map((r) => r.name)
                   const isProfessional = selectedRoleNames.includes('professional')
                   const needsCompanyScope = selectedRoleNames.includes('company_hr') || selectedRoleNames.includes('company_worker')
-                  const needsPatientScope = selectedRoleNames.includes('patient')
+                  const needsPatientScope = selectedRoleNames.includes('patient') || selectedRoleNames.includes('company_worker')
 
                   return (
                     <>

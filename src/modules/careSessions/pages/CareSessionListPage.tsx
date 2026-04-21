@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Trash2, Eye } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Trash2, Eye } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { PageHeader } from '@/shared/components/ui/PageHeader'
@@ -59,15 +59,8 @@ export function CareSessionListPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Atenciones"
-        description="Historial de sesiones individuales de bienestar y terapia"
-        actions={
-          hasPermission('care_sessions:create') ? (
-            <Button asChild>
-              <Link to="/care-sessions/new"><Plus className="mr-2 h-4 w-4" />Nueva atencion</Link>
-            </Button>
-          ) : undefined
-        }
+        title="Atenciones (legado)"
+        description="Registro histórico previo. El flujo actual se gestiona desde citas individuales."
       />
 
       <div className="flex gap-3">

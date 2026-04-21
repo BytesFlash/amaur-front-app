@@ -1,0 +1,5 @@
+﻿User-agent: *
+Allow: /
+Sitemap: https://www.amaur.cl/sitemap.xml
+
+# TODO: agregar reglas especificas de crawling si se publica una zona privada en subdominio.

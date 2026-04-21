@@ -66,15 +66,14 @@ apiClient.interceptors.response.use(
 
         const newToken: string = data.data.access_token
         const newRefresh: string = data.data.refresh_token
+        const refreshedUser = data.data.user
 
-        // Update auth state with rotated tokens only when user state exists.
-        const currentUser = useAuthStore.getState().user
-        if (!currentUser) {
+        if (!refreshedUser) {
           useAuthStore.getState().logout()
           window.location.href = '/login'
           return Promise.reject(error)
         }
-        useAuthStore.getState().setAuth(currentUser, newToken, newRefresh)
+        useAuthStore.getState().setAuth(refreshedUser, newToken, newRefresh)
 
         processQueue(null, newToken)
         originalRequest.headers.Authorization = `Bearer ${newToken}`

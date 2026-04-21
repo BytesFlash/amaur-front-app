@@ -21,11 +21,26 @@ export interface ContractServiceDTO {
   id: string
   contract_id: string
   service_type_id: string
+  service_type_name?: string
   quota_type: 'sessions' | 'hours' | 'unlimited'
+  quantity_per_period?: number
+  period_unit?: 'month' | 'week' | 'total'
   sessions_included?: number
   sessions_used: number
   hours_included?: number
   hours_used: number
+  price_per_unit?: number
+  notes?: string
+}
+
+export interface ContractServiceInput {
+  id?: string
+  service_type_id: string
+  quota_type: 'sessions' | 'hours' | 'unlimited'
+  quantity_per_period?: number
+  period_unit?: 'month' | 'week' | 'total'
+  sessions_included?: number
+  hours_included?: number
   price_per_unit?: number
   notes?: string
 }
@@ -37,9 +52,11 @@ export interface CreateContractInput {
   status?: string
   start_date: string
   end_date?: string
+  renewal_date?: string
   value_clp?: number
   billing_cycle?: string
   notes?: string
+  services?: ContractServiceInput[]
 }
 
 export const contractsApi = {

@@ -17,6 +17,7 @@ export function Header() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
+  const canViewSettings = useAuthStore((s) => s.hasPermission('settings:view'))
 
   const initials = user ? `${user.first_name[0]}${user.last_name[0]}`.toUpperCase() : '?'
 
@@ -60,11 +61,15 @@ export function Header() {
               </p>
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/app/settings')}>
-              <User className="mr-2 h-4 w-4" />
-              Mi perfil
-            </DropdownMenuItem>
+            {canViewSettings && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/app/settings')}>
+                  <User className="mr-2 h-4 w-4" />
+                  Mi perfil
+                </DropdownMenuItem>
+              </>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={handleLogout}

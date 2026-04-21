@@ -34,11 +34,32 @@ import { ProgramFormPage } from '@/modules/programs/pages/ProgramFormPage'
 import { ProgramDetailPage } from '@/modules/programs/pages/ProgramDetailPage'
 import { ProgramWizardPage } from '@/modules/programs/pages/ProgramWizardPage'
 import { AppointmentListPage } from '@/modules/appointments/pages/AppointmentListPage'
+import { AppointmentDetailPage } from '@/modules/appointments/pages/AppointmentDetailPage'
 import { AppointmentFormPage } from '@/modules/appointments/pages/AppointmentFormPage'
 import { AppointmentWizardPage } from '@/modules/appointments/pages/AppointmentWizardPage'
 import { ServiceTypeListPage } from '@/modules/visits/pages/ServiceTypeListPage'
 import { WorkerCalendarPage } from '@/modules/workers/pages/WorkerCalendarPage'
-import { LandingPage } from '@/modules/marketing/pages/LandingPage'
+import { PublicSiteLayout } from '@/modules/marketingSite/components/PublicSiteLayout'
+import { HomePage } from '@/modules/marketingSite/pages/HomePage'
+import { AboutPage } from '@/modules/marketingSite/pages/AboutPage'
+import { ServicesHubPage } from '@/modules/marketingSite/pages/ServicesHubPage'
+import { ServiceDetailPage } from '@/modules/marketingSite/pages/ServiceDetailPage'
+import { CompaniesPage } from '@/modules/marketingSite/pages/CompaniesPage'
+import { BlogListPage } from '@/modules/marketingSite/pages/BlogListPage'
+import { BlogDetailPage } from '@/modules/marketingSite/pages/BlogDetailPage'
+import { ContactPage } from '@/modules/marketingSite/pages/ContactPage'
+import { SocialLinksPage } from '@/modules/marketingSite/pages/SocialLinksPage'
+import { ContentAdminLayout } from '@/modules/contentAdmin/components/ContentAdminLayout'
+import { ContentDashboardPage } from '@/modules/contentAdmin/pages/ContentDashboardPage'
+import { BlogPostsAdminPage } from '@/modules/contentAdmin/pages/BlogPostsAdminPage'
+import { CategoriesAdminPage } from '@/modules/contentAdmin/pages/CategoriesAdminPage'
+import { ServicesAdminPage } from '@/modules/contentAdmin/pages/ServicesAdminPage'
+import { FaqAdminPage } from '@/modules/contentAdmin/pages/FaqAdminPage'
+import { TestimonialsAdminPage } from '@/modules/contentAdmin/pages/TestimonialsAdminPage'
+import { SeoAdminPage } from '@/modules/contentAdmin/pages/SeoAdminPage'
+import { MediaAdminPage } from '@/modules/contentAdmin/pages/MediaAdminPage'
+import { LeadsAdminPage } from '@/modules/contentAdmin/pages/LeadsAdminPage'
+import { ContentSettingsAdminPage } from '@/modules/contentAdmin/pages/ContentSettingsAdminPage'
 
 const legacyAppPrefixes = [
   '/dashboard',
@@ -74,13 +95,34 @@ function LegacyAppRedirect() {
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <LandingPage />,
+    element: <PublicSiteLayout />,
     errorElement: <RouteErrorPage />,
+    children: [
+      { index: true, element: <HomePage /> },
+      { path: 'nosotros', element: <AboutPage /> },
+      { path: 'servicios', element: <ServicesHubPage /> },
+      { path: 'servicios/ergonomia-laboral', element: <Navigate to="/servicios/bienestar-empresarial" replace /> },
+      { path: 'servicios/:slug', element: <ServiceDetailPage /> },
+      { path: 'empresas', element: <CompaniesPage /> },
+      { path: 'blog', element: <BlogListPage /> },
+      { path: 'blog/checklist-ergonomico-en-bodegas', element: <Navigate to="/blog/checklist-bienestar-empresarial-en-bodegas" replace /> },
+      { path: 'blog/:slug', element: <BlogDetailPage /> },
+      { path: 'contacto', element: <ContactPage /> },
+    ],
   },
   {
     path: '/login',
     element: <LoginPage />,
     errorElement: <RouteErrorPage />,
+  },
+  {
+    path: '/r',
+    element: <SocialLinksPage />,
+    errorElement: <RouteErrorPage />,
+  },
+  {
+    path: '/links',
+    element: <Navigate to="/r" replace />,
   },
   {
     path: '/unauthorized',
@@ -247,17 +289,18 @@ export const router = createBrowserRouter([
           // Individual appointments
           {
             path: 'appointments',
-            element: <PermissionGuard permission="visits:view" />,
+            element: <PermissionGuard permission="appointments:view" />,
             children: [
               { index: true, element: <AppointmentListPage /> },
               {
                 path: 'new',
-                element: <PermissionGuard permission="visits:create" />,
+                element: <PermissionGuard permission="appointments:create" />,
                 children: [{ index: true, element: <AppointmentWizardPage /> }],
               },
+              { path: ':id', element: <AppointmentDetailPage /> },
               {
                 path: ':id/edit',
-                element: <PermissionGuard permission="visits:edit" />,
+                element: <PermissionGuard permission="appointments:edit" />,
                 children: [{ index: true, element: <AppointmentFormPage /> }],
               },
             ],
@@ -302,6 +345,27 @@ export const router = createBrowserRouter([
             path: 'settings',
             element: <PermissionGuard permission="settings:view" />,
             children: [{ index: true, element: <SettingsPage /> }],
+          },
+          {
+            path: 'content',
+            element: <PermissionGuard permission="settings:view" />,
+            children: [
+              {
+                element: <ContentAdminLayout />,
+                children: [
+                  { index: true, element: <ContentDashboardPage /> },
+                  { path: 'posts', element: <BlogPostsAdminPage /> },
+                  { path: 'categories', element: <CategoriesAdminPage /> },
+                  { path: 'services', element: <ServicesAdminPage /> },
+                  { path: 'faqs', element: <FaqAdminPage /> },
+                  { path: 'testimonials', element: <TestimonialsAdminPage /> },
+                  { path: 'seo', element: <SeoAdminPage /> },
+                  { path: 'media', element: <MediaAdminPage /> },
+                  { path: 'leads', element: <LeadsAdminPage /> },
+                  { path: 'settings', element: <ContentSettingsAdminPage /> },
+                ],
+              },
+            ],
           },
           { path: '*', element: <NotFoundPage /> },
         ],

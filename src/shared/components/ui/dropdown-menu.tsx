@@ -6,9 +6,31 @@ import { Check, ChevronRight, Circle } from "lucide-react"
 
 import { cn } from "@/shared/utils/cn"
 
-const DropdownMenu = DropdownMenuPrimitive.Root
+const DropdownMenu = ({
+  modal = false,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>) => (
+  <DropdownMenuPrimitive.Root modal={modal} {...props} />
+)
 
-const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger
+const DropdownMenuTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Trigger>
+>(({ onClick, onPointerDown, ...props }, ref) => (
+  <DropdownMenuPrimitive.Trigger
+    ref={ref}
+    onClick={(event) => {
+      event.stopPropagation()
+      onClick?.(event)
+    }}
+    onPointerDown={(event) => {
+      event.stopPropagation()
+      onPointerDown?.(event)
+    }}
+    {...props}
+  />
+))
+DropdownMenuTrigger.displayName = DropdownMenuPrimitive.Trigger.displayName
 
 const DropdownMenuGroup = DropdownMenuPrimitive.Group
 
@@ -79,9 +101,17 @@ const DropdownMenuItem = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> & {
     inset?: boolean
   }
->(({ className, inset, ...props }, ref) => (
+>(({ className, inset, onClick, onSelect, ...props }, ref) => (
   <DropdownMenuPrimitive.Item
     ref={ref}
+    onClick={(event) => {
+      event.stopPropagation()
+      onClick?.(event)
+    }}
+    onSelect={(event) => {
+      event.stopPropagation()
+      onSelect?.(event)
+    }}
     className={cn(
       "relative flex cursor-default select-none items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
       inset && "pl-8",

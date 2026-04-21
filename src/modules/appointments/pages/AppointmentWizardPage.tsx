@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -144,8 +144,9 @@ export function AppointmentWizardPage() {
   const [step, setStep] = useState(1)
   const [data, setData] = useState<WizardData>(INITIAL)
   const [patientSearch, setPatientSearch] = useState('')
-  const [manualMode, setManualMode] = useState(false)
+  const [weekSearchCount, setWeekSearchCount] = useState(0)
   const createMutation = useCreateAppointment()
+  const currentWeekStart = useMemo(() => getMondayStr(new Date()), [])
 
   // Queries
   const { data: patientsData } = usePatients({ search: patientSearch || undefined, limit: 50 })
@@ -171,6 +172,7 @@ export function AppointmentWizardPage() {
   const slotsByDate = useMemo(() => {
     const map: Record<string, typeof slots> = {}
     for (const slot of slots) {
+      if (!slot.available) continue
       if (!map[slot.date]) map[slot.date] = []
       map[slot.date].push(slot)
     }
@@ -178,6 +180,21 @@ export function AppointmentWizardPage() {
   }, [slots])
 
   const orderedDates = useMemo(() => Object.keys(slotsByDate).sort(), [slotsByDate])
+
+  useEffect(() => {
+    if (!data.workerId || loadingSlots) return
+    if (orderedDates.length > 0) {
+      if (weekSearchCount !== 0) setWeekSearchCount(0)
+      return
+    }
+    if (weekSearchCount >= 8) return
+    setWeekSearchCount((prev) => prev + 1)
+    setData((prev) => ({
+      ...prev,
+      weekStart: addWeeks(prev.weekStart, 1),
+      scheduledAt: '',
+    }))
+  }, [data.workerId, loadingSlots, orderedDates.length, weekSearchCount])
 
   function patch(updates: Partial<WizardData>) {
     setData(prev => ({ ...prev, ...updates }))
@@ -194,7 +211,7 @@ export function AppointmentWizardPage() {
     const effectivePatientId =
       data.asTutor && data.wardId ? data.wardId : data.patientId
     try {
-      await createMutation.mutateAsync({
+      const created = await createMutation.mutateAsync({
         patient_id: effectivePatientId,
         service_type_id: data.serviceTypeId,
         worker_id: data.workerId || undefined,
@@ -206,7 +223,8 @@ export function AppointmentWizardPage() {
         session_count: 1,
       })
       toast.success('Cita agendada correctamente')
-      navigate('/appointments')
+      const first = created[0]
+      navigate(first ? `/app/appointments/${first.id}` : '/app/appointments')
     } catch (error) {
       toast.error(getApiErrorMessage(error, 'Error al agendar la cita'))
     }
@@ -342,13 +360,16 @@ export function AppointmentWizardPage() {
                 <button
                   key={st.id}
                   type="button"
-                  onClick={() =>
+                  onClick={() => {
+                    setWeekSearchCount(0)
                     patch({
                       serviceTypeId: st.id,
                       serviceTypeName: st.name,
                       durationMinutes: st.default_duration_minutes ?? 60,
+                      scheduledAt: '',
+                      weekStart: currentWeekStart,
                     })
-                  }
+                  }}
                   className={cn(
                     'rounded-lg border p-4 text-left transition-all',
                     data.serviceTypeId === st.id
@@ -450,12 +471,13 @@ export function AppointmentWizardPage() {
             value={data.workerId || 'none'}
             onValueChange={v => {
               const w = workers.find(x => x.id === v)
+              setWeekSearchCount(0)
               patch({
                 workerId: v === 'none' ? '' : v,
                 workerName: w ? `${w.first_name} ${w.last_name}` : '',
                 scheduledAt: '',
+                weekStart: currentWeekStart,
               })
-              setManualMode(false)
             }}
           >
             <SelectTrigger>
@@ -481,8 +503,12 @@ export function AppointmentWizardPage() {
               <Button
                 variant="outline"
                 size="icon"
+                disabled={data.weekStart <= currentWeekStart}
                 onClick={() =>
-                  patch({ weekStart: addWeeks(data.weekStart, -1), scheduledAt: '' })
+                  {
+                    setWeekSearchCount(0)
+                    patch({ weekStart: addWeeks(data.weekStart, -1), scheduledAt: '' })
+                  }
                 }
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -493,9 +519,10 @@ export function AppointmentWizardPage() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() =>
+                onClick={() => {
+                  setWeekSearchCount(0)
                   patch({ weekStart: addWeeks(data.weekStart, 1), scheduledAt: '' })
-                }
+                }}
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -509,32 +536,12 @@ export function AppointmentWizardPage() {
             ) : orderedDates.length === 0 ? (
               <div className="space-y-3">
                 <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm">
-                  <p className="font-medium text-amber-800">Sin bloques de horario para esta semana</p>
+                  <p className="font-medium text-amber-800">Sin horarios disponibles para agendar</p>
                   <p className="mt-1 text-xs text-amber-700">
-                    El profesional no tiene disponibilidad configurada para esta semana.
-                    Navega a otra semana o ingresa la hora manualmente.
+                    Mostramos automaticamente la siguiente semana con bloques futuros.
+                    Si no aparecen opciones, el profesional no tiene disponibilidad en las proximas semanas.
                   </p>
                 </div>
-                {!manualMode ? (
-                  <Button variant="outline" size="sm" onClick={() => setManualMode(true)}>
-                    Ingresar hora manualmente
-                  </Button>
-                ) : (
-                  <div className="space-y-2">
-                    <Label>Fecha y hora</Label>
-                    <Input
-                      type="datetime-local"
-                      value={data.scheduledAt}
-                      onChange={e => patch({ scheduledAt: e.target.value })}
-                      min={new Date().toISOString().slice(0, 16)}
-                    />
-                    {data.scheduledAt && (
-                      <p className="text-xs text-muted-foreground">
-                        {formatScheduledAt(data.scheduledAt)}
-                      </p>
-                    )}
-                  </div>
-                )}
               </div>
             ) : (
               <div className="overflow-x-auto pb-2">
@@ -551,15 +558,12 @@ export function AppointmentWizardPage() {
                           <button
                             key={slotKey}
                             type="button"
-                            disabled={!slot.available}
                             onClick={() => patch({ scheduledAt: slotKey })}
                             className={cn(
                               'rounded border px-1.5 py-1.5 text-xs font-medium transition-colors',
-                              !slot.available
-                                ? 'cursor-not-allowed border-muted bg-muted/60 text-muted-foreground line-through'
-                                : isSelected
-                                  ? 'border-primary bg-primary text-primary-foreground'
-                                  : 'border-green-200 bg-green-50 text-green-800 hover:bg-green-100',
+                              isSelected
+                                ? 'border-primary bg-primary text-primary-foreground'
+                                : 'border-green-200 bg-green-50 text-green-800 hover:bg-green-100',
                             )}
                           >
                             {slot.start_time}
@@ -637,6 +641,10 @@ export function AppointmentWizardPage() {
                 {formatScheduledAt(data.scheduledAt)}
               </span>
             </div>
+            <div className="flex justify-between gap-4">
+              <span className="shrink-0 text-muted-foreground">Estado inicial</span>
+              <span className="font-medium">Solicitada</span>
+            </div>
           </CardContent>
         </Card>
 
@@ -656,7 +664,7 @@ export function AppointmentWizardPage() {
           onClick={handleSubmit}
           disabled={createMutation.isPending}
         >
-          {createMutation.isPending ? 'Agendando...' : 'Confirmar cita'}
+          {createMutation.isPending ? 'Agendando...' : 'Registrar cita'}
         </Button>
       </div>
     )
@@ -680,7 +688,7 @@ export function AppointmentWizardPage() {
         title="Nueva cita"
         description="Agenda una cita médica o de bienestar"
         actions={
-          <Button variant="ghost" size="sm" onClick={() => navigate('/appointments')}>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/app/appointments')}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Volver
           </Button>
         }

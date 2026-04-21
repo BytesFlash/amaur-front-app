@@ -133,7 +133,7 @@ export function WorkerFormPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-4 w-4" />
@@ -142,7 +142,7 @@ export function WorkerFormPage() {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pb-2">
           <Card>
             <CardHeader><CardTitle>Información personal</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -279,7 +279,7 @@ export function WorkerFormPage() {
             </Card>
           )}
 
-          <div className="flex gap-3">
+          <div className="sticky bottom-0 z-20 flex gap-3 border-t bg-background/95 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:static md:border-0 md:bg-transparent md:py-0 md:backdrop-blur-none">
             <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
               {isEdit ? 'Guardar cambios' : 'Crear profesional'}
             </Button>

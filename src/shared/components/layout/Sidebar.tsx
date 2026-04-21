@@ -15,6 +15,7 @@ import {
   Briefcase,
   Tag,
   CalendarRange,
+  Newspaper,
 } from 'lucide-react'
 import { cn } from '@/shared/utils/cn'
 import { useAuthStore } from '@/app/stores/authStore'
@@ -26,13 +27,14 @@ const navItems = [
   { label: 'Empresas', to: '/app/companies', icon: Building2, permission: 'companies:view', exact: false },
   { label: 'Profesionales', to: '/app/workers', icon: HardHat, permission: 'workers:view', exact: true },
   { label: 'Horarios', to: '/app/workers/calendar', icon: CalendarRange, permission: 'workers:view', exact: false },
-  { label: 'Citas individuales', to: '/app/appointments', icon: CalendarDays, permission: 'visits:view', exact: false },
+  { label: 'Citas individuales', to: '/app/appointments', icon: CalendarDays, permission: 'appointments:view', exact: false },
   { label: 'Contratos', to: '/app/contracts', icon: FileText, permission: 'contracts:view', exact: false },
   { label: 'Programas', to: '/app/programs', icon: Briefcase, permission: 'contracts:view', exact: false },
   { label: 'Tipos de servicio', to: '/app/service-types', icon: Tag, permission: 'care_sessions:view', exact: false },
   { label: 'Usuarios', to: '/app/users', icon: UserCog, permission: 'users:view', exact: false },
   { label: 'Roles', to: '/app/roles', icon: ShieldCheck, permission: 'roles:view', exact: false },
-  { label: 'Configuracion', to: '/app/settings', icon: Settings, permission: null, exact: false },
+  { label: 'Configuracion', to: '/app/settings', icon: Settings, permission: 'settings:view', exact: false },
+  { label: 'CMS contenidos', to: '/app/content', icon: Newspaper, permission: 'settings:view', exact: false },
 ]
 
 export function Sidebar() {

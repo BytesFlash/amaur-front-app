@@ -49,10 +49,10 @@ const services = [
     accent: 'from-amber-400/20 to-orange-500/10',
   },
   {
-    title: 'Ergonometria',
-    short: 'Entender como el cuerpo responde al puesto y al esfuerzo.',
-    detail: 'Analiza postura, carga, repeticion y movimiento para detectar sobrecarga.',
-    everyday: 'Sirve para prevenir dolor de espalda, cuello, hombro o fatiga sostenida.',
+    title: 'Bienestar empresarial',
+    short: 'Cuidado preventivo para equipos y liderazgos.',
+    detail: 'Integra pausas activas, autocuidado y acciones preventivas adaptadas al contexto laboral.',
+    everyday: 'Ayuda a reducir estres sostenido y molestias fisicas en la jornada.',
     icon: Sparkles,
     accent: 'from-violet-500/15 to-emerald-500/10',
   },
@@ -126,7 +126,7 @@ export function LandingPage() {
             </div>
             <div>
               <p className="font-semibold uppercase tracking-[0.22em] text-slate-700">AMAUR</p>
-              <p className="text-xs text-slate-500">Terapias, ergonomia y bienestar</p>
+              <p className="text-xs text-slate-500">Terapias y bienestar</p>
             </div>
           </Link>
 
@@ -176,7 +176,7 @@ export function LandingPage() {
               AMAUR ayuda a que el cuerpo vuelva a sentirse mas liviano, mas alineado y mas habitable.
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">
-              Terapia ocupacional, kinesiologia, masajes terapeuticos, ergonomia y bienestar empresarial para personas que necesitan alivio y equipos que quieren cuidarse mejor.
+              Terapia ocupacional, kinesiologia, masajes terapeuticos y bienestar empresarial para personas que necesitan alivio y equipos que quieren cuidarse mejor.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Button asChild size="lg" className="rounded-full bg-slate-950 px-7 text-white hover:bg-slate-800">
@@ -238,7 +238,7 @@ export function LandingPage() {
                 <div className="rounded-[1.5rem] border border-emerald-100 bg-[linear-gradient(180deg,#ffffff,#f1fbf7)] p-5">
                   <p className="text-xs uppercase tracking-[0.18em] text-slate-400">empresas</p>
                   <p className="mt-3 text-sm leading-7 text-slate-700">
-                    Programas de bienestar y ergonomia para equipos que quieren trabajar mejor y sentirse mejor.
+                    Programas de bienestar empresarial para equipos que quieren trabajar mejor y sentirse mejor.
                   </p>
                 </div>
               </div>

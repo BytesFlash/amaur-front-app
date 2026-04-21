@@ -40,6 +40,11 @@ export function CareSessionFormPage() {
 
   const searchParams = new URLSearchParams(location.search)
   const prePatientId = searchParams.get('patient_id') ?? ''
+  const preWorkerId = searchParams.get('worker_id') ?? ''
+  const preServiceTypeId = searchParams.get('service_type_id') ?? ''
+  const preSessionDate = searchParams.get('session_date') ?? ''
+  const preSessionTime = searchParams.get('session_time') ?? ''
+  const preAppointmentId = searchParams.get('appointment_id') ?? ''
 
   const { data: existing } = useCareSession(id ?? '')
   const createMutation = useCreateCareSession()
@@ -65,8 +70,13 @@ export function CareSessionFormPage() {
     resolver: zodResolver(schema),
     defaultValues: {
       patient_id: prePatientId,
+      worker_id: preWorkerId,
+      service_type_id: preServiceTypeId,
+      session_date: preSessionDate,
+      session_time: preSessionTime,
       session_type: 'particular',
       status: 'scheduled',
+      notes: preAppointmentId ? `Atencion iniciada desde cita ${preAppointmentId}` : '',
     },
   })
 
@@ -111,8 +121,8 @@ export function CareSessionFormPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={isEdit ? 'Editar atencion' : 'Nueva atencion'}
-        description={isEdit ? 'Modifica los datos de la sesion' : 'Registra una nueva atencion individual'}
+        title={isEdit ? 'Editar atencion' : 'Registro de atencion (legado)'}
+        description={isEdit ? 'Modifica los datos de la sesion' : 'Flujo histórico. Se recomienda registrar desde citas individuales.'}
       />
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-2xl">
         <Card>

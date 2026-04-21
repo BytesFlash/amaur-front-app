@@ -1,5 +1,5 @@
 ﻿import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Pencil, Users, Building2, Calendar, Plus } from 'lucide-react'
+import { ArrowLeft, Pencil, Users, Building2, Calendar } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
@@ -162,13 +162,9 @@ export function VisitDetailPage() {
         </TabsContent>
 
         <TabsContent value="atenciones" className="mt-4 space-y-3">
-          {hasPermission('care_sessions:create') && (
-            <div className="flex justify-end">
-              <Button asChild size="sm">
-                <Link to="/care-sessions/new"><Plus className="mr-1.5 h-3.5 w-3.5" />Nueva atencion</Link>
-              </Button>
-            </div>
-          )}
+          <p className="text-xs text-muted-foreground">
+            Este módulo se mantiene por compatibilidad. Las nuevas consultas clínicas se registran desde citas individuales.
+          </p>
           {careSessions.length === 0 ? (
             <Card>
               <CardContent className="pt-6">
