@@ -2,7 +2,6 @@
 import { Link } from 'react-router-dom'
 import {
   Activity,
-  ArrowRight,
   BriefcaseBusiness,
   ChevronRight,
   HeartHandshake,
@@ -14,9 +13,11 @@ import {
 import { usePublicSnapshot } from '@/modules/content/hooks/usePublicContent'
 import { CtaBanner } from '@/modules/marketingSite/components/CtaBanner'
 import { FaqList } from '@/modules/marketingSite/components/FaqList'
+import { SectionBrandHero } from '@/modules/marketingSite/components/SectionBrandHero'
 import { SeoHead } from '@/modules/marketingSite/components/SeoHead'
 import { localBusinessSchema, organizationSchema } from '@/modules/marketingSite/lib/seo'
 import { buildWhatsappLink, siteConfig } from '@/modules/marketingSite/config/siteConfig'
+import { getServiceHeroImage, getServiceImageAlt } from '@/modules/marketingSite/config/serviceImages'
 import { Button } from '@/shared/components/ui/button'
 import { cn } from '@/shared/utils/cn'
 
@@ -107,6 +108,8 @@ export function HomePage() {
 
   const activeService = services.find((service) => service.slug === activeServiceSlug) ?? services[0]
   const activeVisual = serviceVisuals[activeService?.slug] ?? { icon: Sparkles, accent: 'from-emerald-500/20 to-cyan-500/10' }
+  const activeServiceImage = getServiceHeroImage(activeService.slug, activeService.heroImage)
+  const activeServiceAlt = getServiceImageAlt(activeService.slug, activeService.name)
 
   const postureCurve = stressLevel / 100
   const expressionCurve = Math.min(stressLevel, 94) / 94
@@ -137,57 +140,18 @@ export function HomePage() {
         schemas={[organizationSchema(), localBusinessSchema({ description: page.seo.description })]}
       />
 
-      <section className="grid gap-10 rounded-[2.2rem] border border-slate-200/80 bg-[radial-gradient(circle_at_top,_rgba(15,118,110,0.15),_transparent_42%),linear-gradient(180deg,_#f5f8f2_0%,_#f7f4eb_100%)] p-6 shadow-[0_30px_120px_-65px_rgba(15,23,42,0.55)] sm:p-8 lg:grid-cols-[1.03fr_0.97fr] lg:p-10">
-        <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-white/75 px-4 py-2 text-sm text-slate-700 shadow-sm">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            Salud, recuperacion y bienestar con acompanamiento real
-          </div>
-
-          <h1 className="mt-6 max-w-3xl font-['Georgia','Iowan_Old_Style','Palatino_Linotype',serif] text-5xl leading-[0.95] tracking-tight text-slate-950 sm:text-6xl lg:text-7xl">
-            {page.heroTitle}
-          </h1>
-
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600 sm:text-xl">{page.heroSubtitle}</p>
-
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" className="rounded-full bg-slate-950 px-7 text-white hover:bg-slate-800">
-              <Link to="/servicios">
-                Quiero conocer los servicios
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="rounded-full border-slate-300 bg-white/70 px-7 text-slate-700 hover:bg-white">
-              <a href={whatsappHref} target="_blank" rel="noreferrer">
-                Hablar por WhatsApp
-              </a>
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex flex-col justify-between rounded-[2.1rem] border border-white/80 bg-white/72 p-6 shadow-[0_45px_120px_-50px_rgba(15,23,42,0.42)] backdrop-blur-xl sm:p-8">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-emerald-700">AMAUR</p>
-            <h2 className="mt-3 font-['Georgia','Iowan_Old_Style','Palatino_Linotype',serif] text-4xl leading-tight text-slate-950">
-              Cuidado terapeutico para personas y soluciones de bienestar para empresas.
-            </h2>
-            <p className="mt-5 text-base leading-8 text-slate-600">
-              La experiencia debe sentirse simple y confiable: criterio clinico, cercania humana y acompanamiento real.
-            </p>
-          </div>
-
-          <div className="mt-8 rounded-[1.6rem] bg-slate-950 p-5 text-white">
-            <p className="text-xs uppercase tracking-[0.22em] text-emerald-200/75">Lo que trabaja AMAUR</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {services.slice(0, 7).map((service) => (
-                <span key={service.id} className="rounded-full border border-white/10 bg-white/10 px-3 py-2 text-sm text-white/82">
-                  {service.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      <SectionBrandHero
+        sectionLabel="Inicio"
+        title={page.heroTitle}
+        description={page.heroSubtitle}
+        imageUrl={getServiceHeroImage('kinesiologia')}
+        imageAlt={getServiceImageAlt('kinesiologia', 'Kinesiologia')}
+        imagePosition="left"
+        imageStyle="soft"
+        chips={services.slice(0, 4).map((service) => service.name)}
+        primaryAction={{ label: 'Quiero conocer los servicios', href: '/servicios' }}
+        secondaryAction={{ label: 'Hablar por WhatsApp', href: whatsappHref, external: true }}
+      />
 
       <section className="mt-12 grid gap-8 lg:grid-cols-[0.7fr_1.3fr]">
         <div>
@@ -240,6 +204,14 @@ export function HomePage() {
           <div className="rounded-[1.75rem] border border-slate-900/10 bg-white/78 p-5 shadow-[0_24px_80px_-40px_rgba(15,23,42,0.35)] backdrop-blur">
             <div className={cn('flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br text-slate-900', activeVisual.accent)}>
               <activeVisual.icon className="h-5 w-5" />
+            </div>
+            <div className="mt-4 overflow-hidden rounded-[1.1rem] border border-slate-200">
+              <img
+                src={activeServiceImage}
+                alt={activeServiceAlt}
+                className="h-44 w-full object-cover"
+                loading="lazy"
+              />
             </div>
             <h3 className="mt-4 text-xl font-semibold text-slate-950">{activeService.name}</h3>
             <p className="mt-3 text-sm leading-6 text-slate-600">{activeService.shortDescription}</p>
@@ -403,6 +375,25 @@ export function HomePage() {
           <Button asChild className="mt-6 rounded-full bg-white text-slate-900 hover:bg-emerald-100">
             <Link to="/empresas">Ver propuesta para empresas</Link>
           </Button>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <div className="overflow-hidden rounded-2xl border border-white/15">
+              <img
+                src={getServiceHeroImage('bienestar-empresarial')}
+                alt={getServiceImageAlt('bienestar-empresarial', 'Bienestar empresarial')}
+                className="h-40 w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-white/15">
+              <img
+                src={getServiceHeroImage('pausas-activas')}
+                alt={getServiceImageAlt('pausas-activas', 'Pausas activas')}
+                className="h-40 w-full object-cover"
+                loading="lazy"
+              />
+            </div>
+          </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           {companyHighlights.map((highlight) => (

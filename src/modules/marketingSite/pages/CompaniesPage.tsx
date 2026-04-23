@@ -1,11 +1,12 @@
-﻿import { Link } from 'react-router-dom'
-import { ArrowRight, CheckCircle2 } from 'lucide-react'
+﻿import { CheckCircle2 } from 'lucide-react'
 import { usePublicSnapshot } from '@/modules/content/hooks/usePublicContent'
 import { Breadcrumbs } from '@/modules/marketingSite/components/Breadcrumbs'
 import { CtaBanner } from '@/modules/marketingSite/components/CtaBanner'
 import { FaqList } from '@/modules/marketingSite/components/FaqList'
 import { LeadFormCard } from '@/modules/marketingSite/components/LeadFormCard'
+import { SectionBrandHero } from '@/modules/marketingSite/components/SectionBrandHero'
 import { SeoHead } from '@/modules/marketingSite/components/SeoHead'
+import { getServiceHeroImage, getServiceImageAlt } from '@/modules/marketingSite/config/serviceImages'
 import { breadcrumbSchema, faqSchema, localBusinessSchema } from '@/modules/marketingSite/lib/seo'
 
 const companyProblems = [
@@ -60,19 +61,17 @@ export function CompaniesPage() {
 
       <Breadcrumbs items={breadcrumbs} />
 
-      <section className="rounded-3xl border border-slate-200 bg-slate-900 p-8 text-white shadow-sm sm:p-10">
-        <h1 className="text-4xl font-semibold leading-tight">{page.heroTitle}</h1>
-        <p className="mt-4 max-w-3xl text-lg leading-8 text-slate-200">{page.heroSubtitle}</p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link to="/contacto" className="inline-flex items-center rounded-full bg-white px-5 py-2 text-sm font-semibold text-slate-900 hover:bg-emerald-100">
-            Cotizar programa
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
-          <Link to="/servicios/pausas-activas" className="inline-flex items-center rounded-full border border-white/30 px-5 py-2 text-sm font-semibold text-white hover:bg-white/10">
-            Ver pausas activas
-          </Link>
-        </div>
-      </section>
+      <SectionBrandHero
+        sectionLabel="Empresas"
+        title={page.heroTitle}
+        description={page.heroSubtitle}
+        imageUrl={getServiceHeroImage('bienestar-empresarial')}
+        imageAlt={getServiceImageAlt('bienestar-empresarial', 'Bienestar empresarial')}
+        chips={['Pausas activas', 'Bienestar empresarial', 'Programas preventivos']}
+        primaryAction={{ label: 'Cotizar programa', href: '/contacto' }}
+        secondaryAction={{ label: 'Ver pausas activas', href: '/servicios/pausas-activas' }}
+        tone="dark"
+      />
 
       <section className="mt-8 grid gap-6 md:grid-cols-2">
         <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -145,3 +144,5 @@ export function CompaniesPage() {
     </>
   )
 }
+
+

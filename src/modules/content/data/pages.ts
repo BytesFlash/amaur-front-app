@@ -29,6 +29,8 @@ export const pagesSeed: StaticPageContent[] = [
     description: 'Equipo y enfoque AMAUR.',
     heroTitle: 'Un equipo orientado a resultados humanos y medibles',
     heroSubtitle: 'Trabajamos desde la salud integral con foco en funcionalidad, prevencion y acompanamiento continuo.',
+    heroImage: '/assets/about/equipo-amaur-salud.png',
+    heroImageAlt: 'Equipo AMAUR en sesion fotografica institucional',
     bodySections: [{ id: 'about-mision', title: 'Mision', content: ['Ayudar a personas y equipos a vivir y trabajar con menos dolor, mas energia y mayor autonomia.'] }],
     seo: {
       title: 'Nosotros | AMAUR',

@@ -16,6 +16,7 @@ import { LeadFormCard } from '@/modules/marketingSite/components/LeadFormCard'
 import { SeoHead } from '@/modules/marketingSite/components/SeoHead'
 import { breadcrumbSchema, faqSchema, localBusinessSchema } from '@/modules/marketingSite/lib/seo'
 import { buildWhatsappLink } from '@/modules/marketingSite/config/siteConfig'
+import { getServiceGalleryImages, getServiceHeroImage, getServiceImageAlt } from '@/modules/marketingSite/config/serviceImages'
 import { NotFoundPage } from '@/shared/components/ui/NotFoundPage'
 import { cn } from '@/shared/utils/cn'
 
@@ -121,6 +122,9 @@ export function ServiceDetailPage() {
   }
 
   const HeroIcon = visual.icon
+  const serviceHeroImage = getServiceHeroImage(service.slug, service.heroImage)
+  const serviceImageAlt = getServiceImageAlt(service.slug, service.name)
+  const galleryImages = getServiceGalleryImages(service.slug, service.heroImage).slice(0, 3)
 
   return (
     <>
@@ -183,11 +187,11 @@ export function ServiceDetailPage() {
               </div>
             </div>
 
-            <div className="mt-3 flex h-52 items-center justify-center rounded-2xl border border-slate-200 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.15),_transparent_46%),linear-gradient(180deg,#ffffff,#f7faf8)] p-4">
+            <div className="mt-3 h-56 overflow-hidden rounded-2xl border border-slate-200">
               <img
-                src={service.heroImage ?? '/assets/brand/amaur-logo-dark.png'}
-                alt={`Imagen referencial de ${service.name}`}
-                className="h-full w-full object-contain"
+                src={serviceHeroImage}
+                alt={serviceImageAlt}
+                className="h-full w-full object-cover"
                 loading="lazy"
               />
             </div>
@@ -203,6 +207,19 @@ export function ServiceDetailPage() {
           </div>
         </div>
       </article>
+
+      <section className="mt-8 grid gap-4 md:grid-cols-3">
+        {galleryImages.map((imageUrl, index) => (
+          <article key={`${service.slug}-gallery-${index}`} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <img
+              src={imageUrl}
+              alt={`${serviceImageAlt} - vista ${index + 1}`}
+              className="h-52 w-full object-cover"
+              loading="lazy"
+            />
+          </article>
+        ))}
+      </section>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-2">
         <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

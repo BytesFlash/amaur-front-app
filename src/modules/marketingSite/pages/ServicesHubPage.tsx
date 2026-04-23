@@ -15,7 +15,9 @@ import { usePublicSnapshot } from '@/modules/content/hooks/usePublicContent'
 import { Breadcrumbs } from '@/modules/marketingSite/components/Breadcrumbs'
 import { CtaBanner } from '@/modules/marketingSite/components/CtaBanner'
 import { FaqList } from '@/modules/marketingSite/components/FaqList'
+import { SectionBrandHero } from '@/modules/marketingSite/components/SectionBrandHero'
 import { SeoHead } from '@/modules/marketingSite/components/SeoHead'
+import { getServiceHeroImage, getServiceImageAlt } from '@/modules/marketingSite/config/serviceImages'
 import { breadcrumbSchema, faqSchema, localBusinessSchema } from '@/modules/marketingSite/lib/seo'
 import { cn } from '@/shared/utils/cn'
 
@@ -178,13 +180,16 @@ export function ServicesHubPage() {
 
       <Breadcrumbs items={breadcrumbs} />
 
-      <section className="rounded-3xl border border-slate-200 bg-[linear-gradient(180deg,#f9faf8,#f2f5ee)] p-8 shadow-sm sm:p-10">
-        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">Servicios AMAUR</p>
-        <h1 className="mt-3 max-w-4xl font-['Georgia','Iowan_Old_Style','Palatino_Linotype',serif] text-4xl leading-tight text-slate-900 sm:text-5xl">
-          {title}
-        </h1>
-        <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600 sm:text-lg">{subtitle}</p>
-      </section>
+      <SectionBrandHero
+        sectionLabel="Servicios"
+        title={title}
+        description={subtitle}
+        imageUrl={getServiceHeroImage(activeService.slug, activeService.heroImage)}
+        imageAlt={getServiceImageAlt(activeService.slug, activeService.name)}
+        chips={['Terapias personalizadas', 'Bienestar empresarial', 'Enfoque preventivo']}
+        primaryAction={{ label: 'Explorar servicios', href: `/servicios/${activeService.slug}` }}
+        secondaryAction={{ label: 'Hablar con AMAUR', href: '/contacto' }}
+      />
 
       <section className="mt-10">
         <div className="mb-4 flex items-end justify-between gap-4">
@@ -206,6 +211,14 @@ export function ServicesHubPage() {
                 key={service.id}
                 className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_12px_32px_-26px_rgba(15,23,42,0.35)]"
               >
+                <div className="mb-4 overflow-hidden rounded-xl border border-slate-200">
+                  <img
+                    src={getServiceHeroImage(service.slug, service.heroImage)}
+                    alt={getServiceImageAlt(service.slug, service.name)}
+                    className="h-36 w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
                 <div className="flex items-center justify-between gap-3">
                   <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br', visual.accent)}>
                     <Icon className="h-4 w-4 text-slate-900" />
@@ -256,6 +269,14 @@ export function ServicesHubPage() {
             const Icon = visual.icon
             return (
               <article key={service.id} className="rounded-2xl border border-white/20 bg-white/10 p-5 backdrop-blur">
+                <div className="mb-4 overflow-hidden rounded-xl border border-white/20">
+                  <img
+                    src={getServiceHeroImage(service.slug, service.heroImage)}
+                    alt={getServiceImageAlt(service.slug, service.name)}
+                    className="h-36 w-full object-cover"
+                    loading="lazy"
+                  />
+                </div>
                 <div className="flex items-center gap-3">
                   <div className={cn('flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br', visual.accent)}>
                     <Icon className="h-4 w-4 text-slate-900" />
@@ -327,6 +348,15 @@ export function ServicesHubPage() {
           </div>
 
           <p className="mt-4 text-sm leading-7 text-slate-700">{activeService.intro}</p>
+
+          <div className="mt-4 overflow-hidden rounded-2xl border border-slate-200">
+            <img
+              src={getServiceHeroImage(activeService.slug, activeService.heroImage)}
+              alt={getServiceImageAlt(activeService.slug, activeService.name)}
+              className="h-52 w-full object-cover"
+              loading="lazy"
+            />
+          </div>
 
           <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50/50 px-4 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-emerald-700">Beneficio principal</p>

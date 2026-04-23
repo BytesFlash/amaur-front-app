@@ -92,6 +92,8 @@ export interface StaticPageContent {
   description: string
   heroTitle: string
   heroSubtitle: string
+  heroImage?: string
+  heroImageAlt?: string
   bodySections: Array<{
     id: string
     title: string

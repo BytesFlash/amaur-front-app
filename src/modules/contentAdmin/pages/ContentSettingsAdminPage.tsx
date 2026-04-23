@@ -192,6 +192,22 @@ export function ContentSettingsAdminPage() {
               />
             </div>
             <div>
+              <Label>Hero image URL</Label>
+              <Input
+                value={selectedPage.heroImage ?? ''}
+                onChange={(event) => updateSelectedPage({ heroImage: event.target.value })}
+                placeholder="/assets/about/equipo-amaur-salud.png"
+              />
+            </div>
+            <div>
+              <Label>Hero image alt</Label>
+              <Input
+                value={selectedPage.heroImageAlt ?? ''}
+                onChange={(event) => updateSelectedPage({ heroImageAlt: event.target.value })}
+                placeholder="Descripcion SEO de la imagen principal"
+              />
+            </div>
+            <div>
               <Label>Meta title</Label>
               <Input
                 value={selectedPage.seo.title}

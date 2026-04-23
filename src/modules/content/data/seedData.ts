@@ -39,6 +39,14 @@ const mediaAssets: MediaAsset[] = [
     kind: 'image',
     createdAt: updatedAt,
   },
+  {
+    id: 'media-about-team',
+    fileName: 'equipo-amaur-salud.png',
+    url: '/assets/about/equipo-amaur-salud.png',
+    altText: 'Equipo AMAUR en sesion institucional',
+    kind: 'image',
+    createdAt: updatedAt,
+  },
 ]
 
 export const seedDatabase: CmsDatabase = {
