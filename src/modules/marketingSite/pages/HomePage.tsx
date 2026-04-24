@@ -426,7 +426,7 @@ export function HomePage() {
         <div className="grid lg:grid-cols-[1fr_1fr]">
           <div className="relative min-h-[260px] overflow-hidden">
             <img
-              src="/assets/about/equipo-amaur-salud.png"
+              src="/assets/about/equipo-amaur-salud.webp"
               alt="Equipo de profesionales AMAUR en sesión clínica"
               className="h-full w-full object-cover"
               loading="lazy"

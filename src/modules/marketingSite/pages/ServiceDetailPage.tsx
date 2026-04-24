@@ -192,7 +192,9 @@ export function ServiceDetailPage() {
                 src={serviceHeroImage}
                 alt={serviceImageAlt}
                 className="h-full w-full object-cover"
-                loading="lazy"
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
               />
             </div>
 

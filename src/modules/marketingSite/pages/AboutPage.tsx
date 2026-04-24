@@ -107,7 +107,7 @@ export function AboutPage() {
         <div className="grid lg:grid-cols-[1fr_1fr]">
           <div className="relative min-h-[320px] overflow-hidden lg:min-h-[500px]">
             <img
-              src="/assets/about/dolor-hombro.png"
+              src="/assets/about/dolor-hombro.webp"
               alt="Atención clínica AMAUR en sesión de salud y bienestar"
               className="h-full w-full object-cover"
               loading="lazy"

@@ -98,7 +98,7 @@ export function SectionBrandHero({
             isDark ? 'border-white/20 bg-white/10' : 'border-emerald-300/50 bg-white/70',
           )}
         >
-          <img src="/assets/brand/amaur-logo-dark.png" alt="Logo AMAUR" className="h-5 w-5 object-contain" />
+          <img src="/assets/brand/amaur-logo-dark.webp" alt="Logo AMAUR" className="h-5 w-5 object-contain" />
           <span
             className={cn(
               'text-xs font-semibold uppercase tracking-[0.24em]',

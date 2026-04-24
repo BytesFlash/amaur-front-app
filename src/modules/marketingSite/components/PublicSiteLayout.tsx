@@ -47,7 +47,7 @@ export function PublicSiteLayout() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center" aria-label="Ir al inicio de AMAUR">
             <img
-              src="/assets/brand/amaur-logo-dark.png"
+              src="/assets/brand/amaur-logo-dark.webp"
               alt="Logo AMAUR"
               className="h-12 w-12 object-contain"
               fetchPriority="high"

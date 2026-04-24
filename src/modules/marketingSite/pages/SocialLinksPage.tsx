@@ -101,7 +101,7 @@ export function SocialLinksPage() {
         <section className="mx-auto w-full max-w-3xl rounded-[2.4rem] border border-slate-900/10 bg-white/78 p-6 shadow-[0_45px_120px_-60px_rgba(15,23,42,0.55)] backdrop-blur sm:p-8">
           <div className="flex flex-col items-center text-center">
             <img
-              src="/assets/brand/amaur-logo-dark.png"
+              src="/assets/brand/amaur-logo-dark.webp"
               alt="Logo AMAUR"
               className="h-16 w-16 object-contain"
               fetchPriority="high"
