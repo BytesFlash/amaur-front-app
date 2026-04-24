@@ -1,0 +1,13 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+# El código fuente se monta como volumen en docker-compose
+# para tener hot reload
+
+EXPOSE 5173
+
+CMD ["npm", "run", "dev"]

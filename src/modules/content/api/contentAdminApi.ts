@@ -13,6 +13,7 @@ import type {
   StaticPageContent,
   Testimonial,
 } from '@/modules/content/types/cms'
+import { apiClient } from '@/shared/api/client'
 
 function upsertById<T extends { id: string }>(items: T[], next: T): T[] {
   const index = items.findIndex((item) => item.id === next.id)
@@ -250,5 +251,18 @@ export const contentAdminApi = {
     }))
 
     return settings
+  },
+
+  async uploadMediaFile(file: File): Promise<{ url: string; fileName: string; mimeType: string; size: number }> {
+    const form = new FormData()
+    form.append('file', file)
+
+    const { data } = await apiClient.post<{
+      data: { url: string; fileName: string; mimeType: string; size: number }
+    }>('/api/v1/content/media/upload', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+
+    return data.data
   },
 }

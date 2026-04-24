@@ -2,10 +2,15 @@
 import { Link } from 'react-router-dom'
 import {
   Activity,
+  ArrowRight,
   BriefcaseBusiness,
+  CalendarDays,
   ChevronRight,
+  Clock3,
   HeartHandshake,
+  Quote,
   Sparkles,
+  Star,
   Stethoscope,
   Waves,
   type LucideIcon,
@@ -416,14 +421,67 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Strip Nosotros */}
+      <section className="mt-12 overflow-hidden rounded-[2.2rem] border border-slate-200 bg-white shadow-sm">
+        <div className="grid lg:grid-cols-[1fr_1fr]">
+          <div className="relative min-h-[260px] overflow-hidden">
+            <img
+              src="/assets/about/equipo-amaur-salud.png"
+              alt="Equipo de profesionales AMAUR en sesión clínica"
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.04),rgba(15,23,42,0.42))]" />
+          </div>
+          <div className="flex flex-col justify-center p-8 sm:p-10">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700">Nosotros</p>
+            <h2 className="mt-3 font-['Georgia','Iowan_Old_Style','Palatino_Linotype',serif] text-3xl leading-tight text-slate-950 sm:text-4xl">
+              Nació de preguntarse por qué esperar a que duela.
+            </h2>
+            <p className="mt-4 text-sm leading-7 text-slate-600">
+              Somos un equipo de kinesiólogos, terapeutas ocupacionales y masoterapeútas que trabajan con un mismo criterio
+              clínico: atender bien, adaptar el formato y sostener los resultados en el tiempo.
+            </p>
+            <Link
+              to="/nosotros"
+              className="mt-5 inline-flex items-center text-sm font-semibold text-slate-900 hover:text-emerald-700"
+            >
+              Conocer el equipo
+              <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonios */}
       <section className="mt-12">
-        <h2 className="text-3xl font-semibold text-slate-900">Prueba social</h2>
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <div className="mb-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700">Testimonios</p>
+          <h2 className="mt-3 font-['Georgia','Iowan_Old_Style','Palatino_Linotype',serif] text-3xl text-slate-950 sm:text-4xl">
+            Lo que dicen quienes ya trabajan con nosotros.
+          </h2>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
           {data.testimonials.map((testimonial) => (
-            <article key={testimonial.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-              <p className="text-sm leading-7 text-slate-700">"{testimonial.quote}"</p>
-              <p className="mt-4 text-sm font-semibold text-slate-900">{testimonial.author}</p>
-              <p className="text-xs text-slate-500">{testimonial.role}</p>
+            <article
+              key={testimonial.id}
+              className="relative overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white p-6 shadow-sm"
+            >
+              <Quote className="h-8 w-8 text-emerald-200" aria-hidden="true" />
+              <p className="mt-3 text-sm leading-7 text-slate-700">
+                {testimonial.quote}
+              </p>
+              <div className="mt-5 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{testimonial.author}</p>
+                  <p className="mt-0.5 text-xs text-slate-500">{testimonial.role}</p>
+                </div>
+                <div className="flex gap-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star key={i} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden="true" />
+                  ))}
+                </div>
+              </div>
             </article>
           ))}
         </div>
@@ -432,6 +490,84 @@ export function HomePage() {
       <div className="mt-12">
         <FaqList faqs={homeFaqs} />
       </div>
+
+      {/* Preview blog */}
+      {data.posts.filter((post) => post.status === 'published').length > 0 && (
+        <section className="mt-12">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-700">Blog</p>
+              <h2 className="mt-3 font-['Georgia','Iowan_Old_Style','Palatino_Linotype',serif] text-3xl text-slate-950 sm:text-4xl">
+                Contenido que sí te sirve.
+              </h2>
+            </div>
+            <Link
+              to="/blog"
+              className="hidden shrink-0 items-center text-sm font-semibold text-slate-900 hover:text-emerald-700 sm:inline-flex"
+            >
+              Ver todos los artículos
+              <ArrowRight className="ml-1.5 h-4 w-4" />
+            </Link>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {data.posts
+              .filter((post) => post.status === 'published')
+              .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+              .slice(0, 3)
+              .map((post) => {
+                const category = data.categories.find((item) => item.slug === post.categorySlug)
+                return (
+                  <article
+                    key={post.id}
+                    className="group overflow-hidden rounded-[1.8rem] border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md"
+                  >
+                    {post.coverImage ? (
+                      <div className="relative h-44 overflow-hidden">
+                        <img
+                          src={post.coverImage}
+                          alt={post.title}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.0),rgba(15,23,42,0.28))]" />
+                      </div>
+                    ) : (
+                      <div className="h-44 bg-[linear-gradient(135deg,#f0faf5,#e8f5ee)]" />
+                    )}
+                    <div className="p-5">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                        {category?.name ?? 'Blog AMAUR'}
+                      </p>
+                      <h3 className="mt-2 text-base font-semibold leading-snug text-slate-950 group-hover:text-emerald-700 transition-colors">
+                        <Link to={`/blog/${post.slug}`}>{post.title}</Link>
+                      </h3>
+                      <p className="mt-2 line-clamp-2 text-xs leading-5 text-slate-500">{post.excerpt}</p>
+                      <div className="mt-3 flex items-center gap-3 text-[11px] text-slate-400">
+                        <span className="inline-flex items-center gap-1">
+                          <CalendarDays className="h-3 w-3" />
+                          {new Date(post.publishedAt).toLocaleDateString('es-CL')}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Clock3 className="h-3 w-3" />
+                          {post.readingMinutes} min
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                )
+              })}
+          </div>
+
+          <Link
+            to="/blog"
+            className="mt-5 inline-flex items-center text-sm font-semibold text-slate-900 hover:text-emerald-700 sm:hidden"
+          >
+            Ver todos los artículos
+            <ArrowRight className="ml-1.5 h-4 w-4" />
+          </Link>
+        </section>
+      )}
 
       <div className="mt-12">
         <CtaBanner

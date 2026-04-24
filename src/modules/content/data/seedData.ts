@@ -47,6 +47,14 @@ const mediaAssets: MediaAsset[] = [
     kind: 'image',
     createdAt: updatedAt,
   },
+  {
+    id: 'media-dolor-hombro',
+    fileName: 'dolor-hombro.png',
+    url: '/assets/about/dolor-hombro.png',
+    altText: 'Dolor de hombro - imagen clinica AMAUR',
+    kind: 'image',
+    createdAt: updatedAt,
+  },
 ]
 
 export const seedDatabase: CmsDatabase = {

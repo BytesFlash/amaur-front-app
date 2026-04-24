@@ -164,14 +164,14 @@ export function SectionBrandHero({
         <img src={imageUrl} alt={imageAlt} className="h-full min-h-[360px] w-full object-cover" loading="eager" />
         {isSoftImage ? (
           <>
-            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(15,23,42,0.08),rgba(15,23,42,0.28))]" />
+            <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,0.04),rgba(2,6,23,0.52))]" />
             <div className="pointer-events-none absolute -left-8 -top-10 h-32 w-32 rounded-full bg-emerald-200/45 blur-2xl" />
-            <div className="pointer-events-none absolute right-2 top-3 rounded-full border border-white/80 bg-white/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-700 backdrop-blur">
+            <div className="pointer-events-none absolute right-2 top-3 rounded-full border border-white/25 bg-black/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/90 backdrop-blur">
               Entrada AMAUR
             </div>
-            <div className="pointer-events-none absolute bottom-4 left-4 right-4 rounded-[1.2rem] border border-white/70 bg-white/72 px-4 py-4 backdrop-blur">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">AMAUR</p>
-              <p className="mt-1 text-sm leading-6 text-slate-800">
+            <div className="pointer-events-none absolute bottom-4 left-4 right-4 rounded-[1.2rem] border border-white/15 bg-slate-900/80 px-4 py-4 backdrop-blur">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-300">AMAUR</p>
+              <p className="mt-1 text-sm font-medium leading-6 text-white/90">
                 Bienestar integral serio con una experiencia visual mas limpia, calmada y cercana.
               </p>
             </div>

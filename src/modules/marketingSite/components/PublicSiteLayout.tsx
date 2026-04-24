@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react'
+﻿import { useMemo, useState, useEffect } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { Menu, X, ChevronDown, LogIn } from 'lucide-react'
 import { useCmsSnapshot } from '@/modules/content/hooks/useCms'
@@ -19,7 +19,14 @@ const mainNavigation = [
 export function PublicSiteLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [servicesOpen, setServicesOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const { data } = useCmsSnapshot()
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const services = useMemo(
     () => data?.services.filter((service) => service.status === 'published') ?? [],
@@ -31,7 +38,12 @@ export function PublicSiteLayout() {
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top,_rgba(15,118,110,0.14),_transparent_32%),linear-gradient(180deg,_#f8f5eb_0%,_#f5f8f2_40%,_#fbfaf5_100%)] text-slate-900">
-      <header className="sticky top-0 z-40 border-b border-slate-900/10 bg-[#f8f5eb]/88 backdrop-blur-xl">
+      <header
+        className={cn(
+          'sticky top-0 z-40 border-b border-slate-900/10 backdrop-blur-xl transition-colors duration-200',
+          scrolled ? 'bg-[#f8f5eb]' : 'bg-[#f8f5eb]/75',
+        )}
+      >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
           <Link to="/" className="flex items-center" aria-label="Ir al inicio de AMAUR">
             <img

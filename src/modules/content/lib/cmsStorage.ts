@@ -178,6 +178,10 @@ function migrateLegacyTerminology(database: CmsDatabase): { database: CmsDatabas
       ? normalizeLegacyCopy(post.seo.ogDescription)
       : post.seo.ogDescription
 
+    // Si el post guardado no tiene coverImage, recuperarla desde el seed por id o slug
+    const seedPost = seedDatabase.posts.find((s) => s.id === post.id || s.slug === nextSlug)
+    const nextCoverImage = post.coverImage ?? seedPost?.coverImage
+
     const sectionsChanged =
       nextSections.length !== post.sections.length ||
       nextSections.some((section, index) => {
@@ -200,6 +204,7 @@ function migrateLegacyTerminology(database: CmsDatabase): { database: CmsDatabas
       nextSeoDescription !== post.seo.description ||
       nextSeoOgTitle !== post.seo.ogTitle ||
       nextSeoOgDescription !== post.seo.ogDescription ||
+      nextCoverImage !== post.coverImage ||
       hasArrayChanged(post.relatedServiceSlugs, nextRelatedServiceSlugs) ||
       sectionsChanged
 
@@ -214,6 +219,7 @@ function migrateLegacyTerminology(database: CmsDatabase): { database: CmsDatabas
       title: nextTitle,
       excerpt: nextExcerpt,
       categorySlug: nextCategorySlug,
+      coverImage: nextCoverImage,
       relatedServiceSlugs: nextRelatedServiceSlugs,
       ctaLabel: nextCtaLabel,
       ctaHref: nextCtaHref,
